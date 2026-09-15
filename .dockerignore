@@ -1,7 +1,13 @@
 .venv/
+.git/
+.gitignore
 __pycache__/
 .pytest_cache/
 .ruff_cache/
 .env
 data/
+k8s/
+tests/
+locustfile.py
 readme.docx
+experiments/
