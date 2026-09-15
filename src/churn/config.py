@@ -1,8 +1,7 @@
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    model_path: str = "artifact/model.joblib"
-    model_metadata_path: str = "artifact/model_metadata.json"
+    model_path: str = "artifacts/churn_catboost.joblib"
     database_url: str | None = None
     log_level: str = "INFO"
 

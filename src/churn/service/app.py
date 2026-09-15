@@ -30,8 +30,6 @@ class Features(BaseModel):
 
 
 class Prediction(BaseModel):
-    #model_config = {"protected_namespaces": ()}
-
     score: float
     churn: bool
     model_version: str
@@ -42,7 +40,7 @@ class Prediction(BaseModel):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     bundle = joblib.load(settings.model_path)
-    app.state.pipeline = bundle["pipeline"]
+    app.state.pipeline = bundle["model"]
     app.state.meta = bundle["metadata"]
     app.state.version = bundle["metadata"]["model_version"]
 
@@ -70,23 +68,15 @@ def ready():
 def predict(x: Features, bg: BackgroundTasks) -> Prediction:
     t0 = time.perf_counter()
     request_id = str(uuid.uuid4())
-    payload = x.model_dump()  # x.dict() in pydantic v1
+    payload = x.model_dump()
     frame = pd.DataFrame([payload]).reindex(columns=app.state.meta["features"])
 
     score = float(app.state.pipeline.predict_proba(frame)[0, 1])
 
     latency_ms = round((time.perf_counter() - t0) * 1000, 2)
 
-    bg.add_task(db.save_prediction, request_id, payload, score, app.state.version, latency_ms)
+    bg.add_task(db.save_prediction, request_id, app.state.version, payload, score, latency_ms, 200)
 
     churn = score >= app.state.meta["threshold"]
 
     return Prediction(score=score, churn=churn, model_version = app.state.version, request_id=request_id, latency_ms=latency_ms)
-
-
-
-
-
-
-
-

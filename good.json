@@ -1,0 +1,13 @@
+{
+    "Surname": "Smith",
+    "CreditScore": 667,
+    "Geography": "France",
+    "Gender": "Female",
+    "Age": 51,
+    "Tenure": 1,
+    "Balance": 0.0,
+    "NumOfProducts": 1,
+    "HasCrCard": false,
+    "IsActiveMember": false,
+    "EstimatedSalary": 129870.93
+}
