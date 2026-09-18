@@ -24,7 +24,7 @@ docker compose up -d --build
 
 **Запуск кластера Kubernetes:**
 ```
-kind create cluster‐‐name mlpro
+kind create cluster ‐‐name mlpro
 ```
 
 **Мониторинг подов через kubectl get pods:**
