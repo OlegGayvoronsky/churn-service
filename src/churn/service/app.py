@@ -75,11 +75,25 @@ def predict(x: Features, bg: BackgroundTasks) -> Prediction:
 
     latency_ms = round((time.perf_counter() - t0) * 1000, 2)
 
-    bg.add_task(db.save_prediction, request_id, app.state.version, payload, score, latency_ms, 200)
+    bg.add_task(
+        db.save_prediction,
+        request_id,
+        app.state.version,
+        payload,
+        score,
+        latency_ms,
+        200
+    )
 
     churn = score >= app.state.meta["threshold"]
 
-    return Prediction(score=score, churn=churn, model_version = app.state.version, request_id=request_id, latency_ms=latency_ms)
+    return Prediction(
+        score=score,
+        churn=churn,
+        model_version=app.state.version,
+        request_id=request_id,
+        latency_ms=latency_ms
+    )
 
 @app.post("/v1/predict/batch")
 def predict_batch(x: BatchFeatures, bg: BackgroundTasks) -> list[Prediction]:
@@ -98,10 +112,18 @@ def predict_batch(x: BatchFeatures, bg: BackgroundTasks) -> list[Prediction]:
 
     results = []
 
-    for payload, score in zip(payloads, scores):
+    for payload, score in zip(payloads, scores, strict=True):
         score = float(score)
         churn = score >= app.state.meta["threshold"]
-        bg.add_task(db.save_prediction, request_id, app.state.version, payload, score, latency_ms, 200)
+        bg.add_task(
+            db.save_prediction,
+            request_id,
+            app.state.version,
+            payload,
+            score,
+            latency_ms,
+            200
+        )
 
         results.append(
             Prediction(

@@ -20,7 +20,6 @@ def benchmark(endpoint, filename):
 
         data = response.json()
 
-        # batch возвращает список Prediction
         if isinstance(data, list):
             latency = data[0]["latency_ms"]
         else:

@@ -1,6 +1,6 @@
 [project]
 name = "churn-service"
-version = "0.2.2"
+version = "0.2.4"
 description = "churn-service dependencies"
 requires-python=">=3.11,<3.12"
 
@@ -38,7 +38,7 @@ testpaths = ["tests"]
 markers = ["integration: нужна бд - адрес в DATABAE_URL"]
 
 [tool.ruff]
-line-length = 160
+line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
