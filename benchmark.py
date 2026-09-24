@@ -1,7 +1,7 @@
 import json
 import statistics
-import requests
 
+import requests
 
 URL = "http://localhost:8000"
 

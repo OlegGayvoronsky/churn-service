@@ -19,6 +19,7 @@ def init() -> None:
     if settings.database_url is None:
         return
     with psycopg.connect(settings.database_url) as conn:
+        conn.execute("SELECT pg_advisory_xact_lock(7001)")
         conn.execute(DDL)
 
 def save_prediction(request_id: str, model_version: str, features: dict, score: float, latency_ms: float, response_code: int) -> None:
