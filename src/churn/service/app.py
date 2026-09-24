@@ -76,7 +76,7 @@ async def validation_error_handler(request: Request, exc: RequestValidationError
     response.background = BackgroundTask(
         db.save_prediction,
         request_id,
-        app.state.version,
+        getattr(app.state, "version", "unknown"),
         _safe_payload(exc.body),
         0.0,
         0.0,
