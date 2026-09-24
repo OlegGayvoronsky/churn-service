@@ -1,6 +1,6 @@
 [project]
 name = "churn-service"
-version = "0.2.4"
+version = "0.3.0"
 description = "churn-service dependencies"
 requires-python=">=3.11,<3.12"
 

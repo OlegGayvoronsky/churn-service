@@ -4,8 +4,11 @@ from contextlib import asynccontextmanager
 
 import joblib
 import pandas as pd
-from fastapi import BackgroundTasks, FastAPI, HTTPException
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
+from fastapi.exception_handlers import request_validation_exception_handler
+from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, Field
+from starlette.background import BackgroundTask
 
 from churn import db
 from churn.config import settings
@@ -26,8 +29,10 @@ class Features(BaseModel):
     IsActiveMember: bool
     EstimatedSalary: float = Field(ge=0)
 
+
 class BatchFeatures(BaseModel):
     rows: list[Features] = Field(min_length=1, max_length=1000)
+
 
 class Prediction(BaseModel):
     score: float
@@ -51,9 +56,39 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="churn-service", version="1.0", lifespan=lifespan)
 
+
+def _safe_payload(body) -> dict:
+    if isinstance(body, dict):
+        return body
+    if isinstance(body, (bytes, bytearray)):
+        body = body.decode("utf-8", errors="replace")
+
+    return {"raw": str(body)[:2000]}
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(request: Request, exc: RequestValidationError):
+    request_id = str(uuid.uuid4())
+
+    response = await request_validation_exception_handler(request, exc)
+    response.headers["X-Request-ID"] = request_id
+
+    response.background = BackgroundTask(
+        db.save_prediction,
+        request_id,
+        app.state.version,
+        _safe_payload(exc.body),
+        0.0,
+        0.0,
+        422,
+    )
+    return response
+
+
 @app.get("/health")
 def health():
     return {"status": "ok", "model_version": getattr(app.state, "version", "unknown")}
+
 
 @app.get("/ready")
 def ready():
@@ -61,7 +96,6 @@ def ready():
         raise HTTPException(status_code=503, detail="Model not loaded")
     
     return {"status": "ready"}
-
 
 
 @app.post("/v1/predict")
@@ -94,6 +128,7 @@ def predict(x: Features, bg: BackgroundTasks) -> Prediction:
         request_id=request_id,
         latency_ms=latency_ms
     )
+
 
 @app.post("/v1/predict/batch")
 def predict_batch(x: BatchFeatures, bg: BackgroundTasks) -> list[Prediction]:
