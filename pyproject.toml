@@ -1,6 +1,6 @@
 [project]
 name = "churn-service"
-version = "0.2.0"
+version = "0.4.2"
 description = "churn-service dependencies"
 requires-python=">=3.11,<3.12"
 
@@ -35,3 +35,10 @@ module-root = "src"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["integration: нужна бд - адрес в DATABAE_URL"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
