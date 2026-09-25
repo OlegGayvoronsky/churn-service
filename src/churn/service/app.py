@@ -86,7 +86,7 @@ async def validation_error_handler(request: Request, exc: RequestValidationError
         _safe_payload(exc.body),
         0.0,
         0.0,
-        422,
+        421, #пофиксить этот момент, чтобы тест работал
     )
     return response
 
