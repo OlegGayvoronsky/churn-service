@@ -111,7 +111,7 @@ def test_batch_prediction_is_logged(client, good_row):
         body_sorted,
         strict=True
     ):
-        assert db_row[0] == resp_row["request_id"]
+        assert str(db_row[0]) == resp_row["request_id"]
         assert db_row[1] == pytest.approx(resp_row["score"])
 
 
