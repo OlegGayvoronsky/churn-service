@@ -184,6 +184,7 @@ dependencies = [
     { name = "psycopg", extra = ["binary"] },
     { name = "pydantic" },
     { name = "pydantic-settings" },
+    { name = "requests" },
     { name = "scikit-learn" },
     { name = "uvicorn" },
 ]
@@ -206,6 +207,7 @@ requires-dist = [
     { name = "psycopg", extras = ["binary"] },
     { name = "pydantic" },
     { name = "pydantic-settings" },
+    { name = "requests", specifier = ">=2.34.2" },
     { name = "scikit-learn", specifier = ">=1.6,<1.7" },
     { name = "uvicorn" },
 ]
