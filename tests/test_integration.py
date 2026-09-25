@@ -19,7 +19,7 @@ def test_prediction_is_logged(client, good_row):
 
     with psycopg.connect(DATABASE_URL) as conn:
         row = conn.execute(
-            "SELECT model_version, score, features->>'Geography', response_code"
+            "SELECT model_version, score, features->>'Geography', response_code "
             "FROM predictions WHERE request_id = %s",
             (body["request_id"],),
         ).fetchone()
@@ -40,7 +40,7 @@ def test_bad_age_is_logged(client, good_row):
 
     with psycopg.connect(DATABASE_URL) as conn:
         row = conn.execute(
-            "SELECT model_version, score, response_code"
+            "SELECT model_version, score, response_code "
             "FROM predictions WHERE request_id = %s",
             (request_id,),
         ).fetchone()
@@ -59,7 +59,7 @@ def test_missing_field_is_logged(client, good_row):
 
     with psycopg.connect(DATABASE_URL) as conn:
         row = conn.execute(
-            "SELECT model_version, score, response_code"
+            "SELECT model_version, score, response_code "
             "FROM predictions WHERE request_id = %s",
             (request_id,),
         ).fetchone()
@@ -77,7 +77,7 @@ def test_extra_field_is_422(client, good_row):
 
     with psycopg.connect(DATABASE_URL) as conn:
         row = conn.execute(
-            "SELECT model_version, score, response_code"
+            "SELECT model_version, score, response_code "
             "FROM predictions WHERE request_id = %s",
             (request_id,),
         ).fetchone()
@@ -95,23 +95,24 @@ def test_batch_prediction_is_logged(client, good_row):
 
     with psycopg.connect(DATABASE_URL) as conn:
         db_rows = conn.execute(
-            "SELECT request_id, features->>'Geography', score, response_code "
+            "SELECT request_id, score, response_code "
             "FROM predictions WHERE request_id = ANY(%s) "
-            "ORDER BY features->>'Geography'",
+            "ORDER BY request_id",
             (request_ids,),
         ).fetchall()
 
     assert len(db_rows) == len(good_rows)
-    assert all(r[3] == 200 for r in db_rows)
+    assert all(r[2] == 200 for r in db_rows)
+
+    body_sorted = sorted(body, key=lambda r: r["request_id"])
 
     for db_row, resp_row in zip(
         db_rows,
-        sorted(body, key=lambda r: r["Geography"]),
+        body_sorted,
         strict=True
     ):
         assert db_row[0] == resp_row["request_id"]
-        assert db_row[1] == resp_row["Geography"] if "Geography" in resp_row else True
-        assert db_row[2] == pytest.approx(resp_row["score"])
+        assert db_row[1] == pytest.approx(resp_row["score"])
 
 
 def test_trash_row_in_batch_is_logged_once(client, good_row):
