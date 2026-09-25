@@ -126,8 +126,29 @@ jobs:
       
       - name: диагностика
         if: failure()
-
         run: |
+          echo "::group::Поды и их статус"
           kubectl get pods -o wide
-          kubectl describe deploy/churn-service | tail -20
-          kubectl logs deploy/churn-service --tail=30 || true
+          echo "::endgroup::"
+
+          echo "::group::Deployments"
+          kubectl get deploy -o wide
+          echo "::endgroup::"
+
+          echo "::group::События кластера (последние 50)"
+          kubectl get events --sort-by=.lastTimestamp -o wide | tail -50
+          echo "::endgroup::"
+
+          for pod in $(kubectl get pods -o jsonpath='{.items[*].metadata.name}'); do
+            echo "::group::describe pod/$pod"
+            kubectl describe pod "$pod"
+            echo "::endgroup::"
+
+            echo "::group::Логи pod/$pod (текущий запуск)"
+            kubectl logs "$pod" --all-containers --tail=100 || echo "нет текущих логов"
+            echo "::endgroup::"
+
+            echo "::group::Логи pod/$pod (предыдущий запуск, если был рестарт)"
+            kubectl logs "$pod" --all-containers --previous --tail=100 || echo "нет логов предыдущего запуска"
+            echo "::endgroup::"
+          done
