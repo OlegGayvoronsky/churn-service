@@ -120,7 +120,7 @@ jobs:
             | python3 -c "import json,sys; r=json.load(sys.stdin); assert 0 <= r['score'] <= 1, r"; echo
           sleep 2
 
-          kubectl exec deploy/postgres --psql -U postgres -d churn \
+          kubectl exec deploy/postgres -- psql -U postgres -d churn \
             -tc "SELECT count(*) FROM predictions" | grep -q 1
       
       - name: диагностика
@@ -129,4 +129,4 @@ jobs:
         run: |
           kubectl get pods -o wide
           kubectl describe deploy/churn-service | tail -20
-          kubectl logs deploy/churn-service | tail -20
+          kubectl logs deploy/churn-service --tail=30 || true
