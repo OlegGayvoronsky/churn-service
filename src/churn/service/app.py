@@ -1,3 +1,5 @@
+import json
+import logging
 import time
 import uuid
 from contextlib import asynccontextmanager
@@ -7,6 +9,7 @@ import pandas as pd
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from starlette.background import BackgroundTask
 
@@ -57,6 +60,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="churn-service", version="1.0", lifespan=lifespan)
 
 
+logger = logging.getLogger(__name__)
+
+
 def _safe_payload(body) -> dict:
     if isinstance(body, dict):
         return body
@@ -83,6 +89,39 @@ async def validation_error_handler(request: Request, exc: RequestValidationError
         422,
     )
     return response
+
+
+@app.middleware("http")
+async def unhandled_error_middleware(request: Request, call_next):
+    try:
+        return await call_next(request)
+    except Exception:
+        request_id = str(uuid.uuid4())
+        logger.exception("Unhandled error, request_id=%s path=%s", request_id, request.url.path)
+
+        response = JSONResponse(
+            status_code=500,
+            content={"detail": "Internal server error", "request_id": request_id},
+            headers={"X-Request-ID": request_id},
+        )
+
+
+        if request.url.path.startswith("/v1/predict"):
+            try:
+                raw = await request.body()
+                body = json.loads(raw)
+            except Exception:
+                body = raw if "raw" in locals() else b""
+            response.background = BackgroundTask(
+                db.save_prediction,
+                request_id,
+                getattr(app.state, "version", "unknown"),
+                _safe_payload(body),
+                0.0,
+                0.0,
+                500,
+            )
+        return response
 
 
 @app.get("/health")
@@ -133,7 +172,6 @@ def predict(x: Features, bg: BackgroundTasks) -> Prediction:
 @app.post("/v1/predict/batch")
 def predict_batch(x: BatchFeatures, bg: BackgroundTasks) -> list[Prediction]:
     t0 = time.perf_counter()
-    request_id = str(uuid.uuid4())
 
     payloads = [row.model_dump() for row in x.rows]
 
@@ -148,6 +186,7 @@ def predict_batch(x: BatchFeatures, bg: BackgroundTasks) -> list[Prediction]:
     results = []
 
     for payload, score in zip(payloads, scores, strict=True):
+        request_id = str(uuid.uuid4())
         score = float(score)
         churn = score >= app.state.meta["threshold"]
         bg.add_task(

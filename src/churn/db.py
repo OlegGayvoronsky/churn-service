@@ -5,14 +5,14 @@ from churn.config import settings
 
 DDL = """
     CREATE TABLE IF NOT EXISTS predictions (
-    request_id uuid PRIMARY KEY,
-    ts timestamptz NOT NULL DEFAULT now(),
-    model_version text NOT NULL,
-    features jsonb NOT NULL,
-    score double precision NOT NULL,
-    latency_ms double precision NOT NULL,
-    response_code int NOT NULL
-)
+        request_id uuid PRIMARY KEY,
+        ts timestamptz NOT NULL DEFAULT now(),
+        model_version text NOT NULL,
+        features jsonb NOT NULL,
+        score double precision NOT NULL,
+        latency_ms double precision NOT NULL,
+        response_code int NOT NULL
+    )
 """
 
 def init() -> None:
