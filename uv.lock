@@ -174,7 +174,7 @@ wheels = [
 
 [[package]]
 name = "churn-service"
-version = "0.4.3"
+version = "0.4.4"
 source = { editable = "." }
 dependencies = [
     { name = "catboost" },
@@ -184,7 +184,6 @@ dependencies = [
     { name = "psycopg", extra = ["binary"] },
     { name = "pydantic" },
     { name = "pydantic-settings" },
-    { name = "requests" },
     { name = "scikit-learn" },
     { name = "uvicorn" },
 ]
@@ -207,7 +206,6 @@ requires-dist = [
     { name = "psycopg", extras = ["binary"] },
     { name = "pydantic" },
     { name = "pydantic-settings" },
-    { name = "requests", specifier = ">=2.34" },
     { name = "scikit-learn", specifier = ">=1.6,<1.7" },
     { name = "uvicorn" },
 ]

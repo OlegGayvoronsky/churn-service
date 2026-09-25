@@ -1,6 +1,6 @@
 [project]
 name = "churn-service"
-version = "0.4.3"
+version = "0.4.4"
 description = "churn-service dependencies"
 requires-python=">=3.11,<3.12"
 
@@ -13,8 +13,7 @@ dependencies = [
     "pandas",
     "scikit-learn>=1.6,<1.7",
     "joblib",
-    "psycopg[binary]",
-    "requests>=2.34",
+    "psycopg[binary]"
 ]
 
 [dependency-groups]
