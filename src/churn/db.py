@@ -9,8 +9,8 @@ DDL = """
         ts timestamptz NOT NULL DEFAULT now(),
         model_version text NOT NULL,
         features jsonb NOT NULL,
-        score double precision NOT NULL,
-        latency_ms double precision NOT NULL,
+        score double precision,
+        latency_ms double precision,
         response_code int NOT NULL
     )
 """

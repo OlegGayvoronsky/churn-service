@@ -84,8 +84,8 @@ async def validation_error_handler(request: Request, exc: RequestValidationError
         request_id,
         getattr(app.state, "version", "unknown"),
         _safe_payload(exc.body),
-        0.0,
-        0.0,
+        float("nan"),
+        float("nan"),
         422,
     )
     return response
@@ -117,8 +117,8 @@ async def unhandled_error_middleware(request: Request, call_next):
                 request_id,
                 getattr(app.state, "version", "unknown"),
                 _safe_payload(body),
-                0.0,
-                0.0,
+                float("nan"),
+                float("nan"),
                 500,
             )
         return response
