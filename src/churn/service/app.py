@@ -4,7 +4,6 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 
-import joblib
 import pandas as pd
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 from fastapi.exception_handlers import request_validation_exception_handler
@@ -14,7 +13,7 @@ from pydantic import BaseModel, Field
 from starlette.background import BackgroundTask
 
 from churn import db
-from churn.config import settings
+from churn.model_store import load_model
 
 
 class Features(BaseModel):
@@ -47,19 +46,14 @@ class Prediction(BaseModel):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    bundle = joblib.load(settings.model_path)
-    app.state.pipeline = bundle["model"]
-    app.state.meta = bundle["metadata"]
-    app.state.version = bundle["metadata"]["model_version"]
+    app.state.model, app.state.meta, app.state.version = load_model()
 
     db.init()
     yield
-    app.state.pipeline = None
+    app.state.model = None
 
 
 app = FastAPI(title="churn-service", version="1.0", lifespan=lifespan)
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -84,8 +78,8 @@ async def validation_error_handler(request: Request, exc: RequestValidationError
         request_id,
         getattr(app.state, "version", "unknown"),
         _safe_payload(exc.body),
-        0.0,
-        0.0,
+        float("nan"),
+        float("nan"),
         422,
     )
     return response
@@ -117,8 +111,8 @@ async def unhandled_error_middleware(request: Request, call_next):
                 request_id,
                 getattr(app.state, "version", "unknown"),
                 _safe_payload(body),
-                0.0,
-                0.0,
+                float("nan"),
+                float("nan"),
                 500,
             )
         return response
@@ -131,7 +125,7 @@ def health():
 
 @app.get("/ready")
 def ready():
-    if getattr(app.state, "pipeline", "None") is  None:
+    if getattr(app.state, "model", "None") is  None:
         raise HTTPException(status_code=503, detail="Model not loaded")
     
     return {"status": "ready"}
@@ -144,7 +138,7 @@ def predict(x: Features, bg: BackgroundTasks) -> Prediction:
     payload = x.model_dump()
     frame = pd.DataFrame([payload]).reindex(columns=app.state.meta["features"])
 
-    score = float(app.state.pipeline.predict_proba(frame)[0, 1])
+    score = float(app.state.model.predict_proba(frame)[0, 1])
 
     latency_ms = round((time.perf_counter() - t0) * 1000, 2)
 
@@ -180,7 +174,7 @@ def predict_batch(x: BatchFeatures, bg: BackgroundTasks) -> list[Prediction]:
         .reindex(columns=app.state.meta["features"])
     )
 
-    scores = app.state.pipeline.predict_proba(frame)[:, 1]
+    scores = app.state.model.predict_proba(frame)[:, 1]
     latency_ms = round((time.perf_counter() - t0) * 1000, 2)
 
     results = []
