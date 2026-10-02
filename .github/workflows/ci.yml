@@ -117,6 +117,13 @@ jobs:
         run: |
           kubectl apply -f k8s/postgres.yaml
           kubectl rollout status deploy/postgres --timeout=180s
+
+      - name: пароль в базе = секрет
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          echo "ALTER USER postgres PASSWORD :'pw';" | \
+            kubectl exec -i deploy/postgres -- psql -U postgres -v pw="$DB_PASSWORD"
       
       - name: сервис
         run: |
@@ -128,7 +135,7 @@ jobs:
         env:
           MODEL_NAME: churn_catboost
         run: |
-          U="http://$KIND_CLUSTER-control-plane:30080"; H="Host: churn.localhost-service"
+          U="http://$KIND_CLUSTER-control-plane:30080"; H="Host: churn-service.localhost"
           
           curl --fail -s --retry 5 --retry-all-errors -H "$H" $U/health | tee health.json; echo
           jq -e --arg p "$MODEL_NAME-v" \
