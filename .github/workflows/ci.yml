@@ -135,18 +135,25 @@ jobs:
         env:
           MODEL_NAME: churn_catboost
         run: |
+          set -eo pipefail
+          kubectl rollout status deploy/churn-service --timeout=180s
           U="http://$KIND_CLUSTER-control-plane:30080"; H="Host: churn-service.localhost"
-          
-          curl --fail -s --retry 5 --retry-all-errors -H "$H" $U/health | tee health.json; echo
-          jq -e --arg p "$MODEL_NAME-v" \
-            '.model_version | startswith($p) and test("-v[0-9]+$")' health.json
-          
-          curl --fail -s -X POST -H "$H" $U/v1/predict \
-            -H "Content-Type: application/json" -d @good.json | tee pred.json; echo
-          jq -e '(.score | type == "number") and .score >= 0 and .score <= 1' pred.json
-          sleep 2
 
-          RID=$(jq -r .request_id pred.json)
+          curl --fail -s --retry 10 --retry-delay 3 --retry-all-errors -H "$H" "$U/health" -o health.json
+          cat health.json; echo
+          jq -e --arg p "$MODEL_NAME-v" '.model_version | startswith($p) and test("-v[0-9]+$")' health.json
+
+          for i in $(seq 1 10); do
+            CODE=$(curl -s -o pred.json -w '%{http_code}' -X POST -H "$H" "$U/v1/predict" \
+              -H "Content-Type: application/json" -d @good.json)
+            echo "попытка $i: HTTP $CODE"
+            case "$CODE" in 502|503|504|000) sleep 3 ;; *) break ;; esac
+          done
+          cat pred.json; echo
+          [ "$CODE" = "200" ] || exit 1
+          jq -e '(.score | type == "number") and .score >= 0 and .score <= 1' pred.json
+
+          RID=$(jq -er .request_id pred.json)
           for i in $(seq 1 10); do
             N=$(kubectl exec deploy/postgres -- psql -U postgres -d churn \
               -tAc "SELECT count(*) FROM predictions WHERE request_id = '$RID'")
