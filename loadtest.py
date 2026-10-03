@@ -1,11 +1,13 @@
-"""Серия прогонов locust со сводной таблицей: пользователи, реплики, p95, CPU на под, requests до/после.
+"""Серия прогонов locust со сводной таблицей: пользователи, реплики, p95, CPU на под,
+   requests до/после.
 
 Запуск из корня репозитория (рядом с locustfile.py), kubectl должен смотреть на нужный кластер:
 
   uv run python loadtest.py
   uv run python loadtest.py --users 20 60 150 --duration 240 --host http://churn-service.localhost
 
-Результат: results/runN_stats.csv, results/runN.html (из locust), results/summary.md, results/summary.csv
+Результат: results/runN_stats.csv, results/runN.html (из locust),
+results/summary.md, results/summary.csv
 """
 import argparse
 import csv
@@ -22,8 +24,8 @@ try:
 except Exception:
     pass
 
-SAMPLE_EVERY = 15  # сек: период опроса kubectl (metrics-server обновляется примерно так же)
-TAIL_SECONDS = 60  # CPU усредняется по последней минуте прогона
+SAMPLE_EVERY = 15
+TAIL_SECONDS = 60
 
 
 def kubectl(*args: str) -> str:
@@ -38,18 +40,30 @@ def cpu_to_m(value: str) -> int:
 
 
 def deploy_selector(deploy: str) -> str:
-    labels = json.loads(kubectl("get", "deploy", deploy, "-o", "jsonpath={.spec.selector.matchLabels}"))
+    labels = json.loads(
+        kubectl("get", "deploy", deploy, "-o", "jsonpath={.spec.selector.matchLabels}")
+    )
     return ",".join(f"{k}={v}" for k, v in labels.items())
 
 
 def cpu_requests(deploy: str) -> str:
-    res = json.loads(kubectl("get", "deploy", deploy, "-o", "jsonpath={.spec.template.spec.containers[0].resources}") or "{}")
+    res = json.loads(
+        kubectl(
+            "get",
+            "deploy",
+            deploy,
+            "-o",
+            "jsonpath={.spec.template.spec.containers[0].resources}"
+        ) or "{}"
+    )
     return res.get("requests", {}).get("cpu", "не задан")
 
 
 def hpa_state(hpa: str) -> dict:
     d = json.loads(kubectl("get", "hpa", hpa, "-o", "json"))
-    return {"current": d["status"].get("currentReplicas", 0), "min": d["spec"].get("minReplicas", 1)}
+    return {
+        "current": d["status"].get("currentReplicas", 0), "min": d["spec"].get("minReplicas", 1)
+    }
 
 
 def pod_cpus(selector: str) -> list[int]:
@@ -105,7 +119,11 @@ def run_locust(users: int, args, prefix: Path, deploy: str, hpa: str, selector: 
         "req_after": req_after,
     })
     if stats["failures"]:
-        print(f"  ВНИМАНИЕ: {stats['failures']} ошибок из {stats['requests']} запросов, прогон нечестный")
+        print(
+            f"  ВНИМАНИЕ: {stats['failures']} ошибок "
+            f"из {stats['requests']} запросов, "
+            f"прогон нечестный"
+        )
     return stats
 
 
