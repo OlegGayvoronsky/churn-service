@@ -7,4 +7,4 @@ data:
   MODEL_PATH: artifacts/churn_catboost.joblib
   MLFLOW_TRACKING_URI: http://mlflow.mlops:5000
   MODEL_NAME: churn_catboost
-  MODEL_ALIAS: champion
+  MODEL_ALIAS: prod
