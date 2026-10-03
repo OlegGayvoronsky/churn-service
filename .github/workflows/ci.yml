@@ -137,7 +137,7 @@ jobs:
         run: |
           set -eo pipefail
           kubectl rollout status deploy/churn-service --timeout=180s
-          U="http://$KIND_CLUSTER-control-plane:30080"; H="Host: churn-trashservice.localhost"
+          U="http://$KIND_CLUSTER-control-plane:30080"; H="Host: churn-service.localhost"
 
           curl --fail -s --retry 10 --retry-delay 3 --retry-all-errors -H "$H" "$U/health" -o health.json
           cat health.json; echo
