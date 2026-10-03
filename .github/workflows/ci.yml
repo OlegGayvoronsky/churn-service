@@ -77,7 +77,7 @@ jobs:
       packages: read
 
     env:
-      KIND_CLUSTER: churn-service
+      KIND_CLUSTER: churn-trashservice
 
     steps:
       - uses: actions/checkout@v7
