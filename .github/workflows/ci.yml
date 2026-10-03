@@ -138,7 +138,7 @@ jobs:
           set -eo pipefail
           U="http://$KIND_CLUSTER-control-plane:30080"; H="Host: churn-service.localhost"
           
-          curl --fail -s --retry 10 --retry-delay 3 --retry-all-errors -H "$H" "$U/health" -o health.json
+          curl --fail -s --retry 10 --retry-delay 3 --retry-all-errors -H "$H" "$U/health" -o йhealth.json
           cat health.json; echo
           jq -e --arg p "$MODEL_NAME-v" \
             '.model_version | startswith($p) and test("-v[0-9]+$")' health.json

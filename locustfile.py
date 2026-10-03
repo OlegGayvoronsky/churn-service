@@ -2,6 +2,9 @@ from locust import HttpUser, between, task
 
 
 class ChurnUser(HttpUser):
+    def on_start(self):
+            self.client.headers["Host"] = "churn-service.localhost"
+
     wait_time = between(0.5, 1.5)
 
     good_row = {
