@@ -1,23 +1,24 @@
 # Отчёт: churn-service
+
 ---
 
 ## Задание 1
 
-![Задание 1, скриншот 1](<img width="1088" height="375" alt="image" src="https://github.com/user-attachments/assets/22b5e5b6-36db-4d64-a0f8-af1c45a0353a" />)
+<img width="1088" height="375" alt="image" src="https://github.com/user-attachments/assets/22b5e5b6-36db-4d64-a0f8-af1c45a0353a" />
 
-![Задание 1, скриншот 2](<img width="1280" height="686" alt="image" src="https://github.com/user-attachments/assets/78acabda-6b1b-4350-9be2-b0c1444ca336" />)
+<img width="1280" height="686" alt="image" src="https://github.com/user-attachments/assets/78acabda-6b1b-4350-9be2-b0c1444ca336" />
 
 ---
 
 ## Задание 2
 
-![Задание 2, скриншот 1](<img width="1280" height="653" alt="image" src="https://github.com/user-attachments/assets/b556e6ef-d5f6-4608-82e9-46bd846b4721" />)
+<img width="1280" height="653" alt="image" src="https://github.com/user-attachments/assets/b556e6ef-d5f6-4608-82e9-46bd846b4721" />
 
-![Задание 2, скриншот 2](<img width="1280" height="91" alt="image" src="https://github.com/user-attachments/assets/7152f2f7-944b-463d-84d1-0de50bda2d58" />)
+<img width="1280" height="91" alt="image" src="https://github.com/user-attachments/assets/7152f2f7-944b-463d-84d1-0de50bda2d58" />
 
-![Задание 2, скриншот 3](<img width="1280" height="94" alt="image" src="https://github.com/user-attachments/assets/c1ee2874-9cc6-469f-87e3-fc4ff32dd369" />)
+<img width="1280" height="94" alt="image" src="https://github.com/user-attachments/assets/c1ee2874-9cc6-469f-87e3-fc4ff32dd369" />
 
-![Задание 2, скриншот 4](<img width="1280" height="94" alt="image" src="https://github.com/user-attachments/assets/a11a3d11-8da1-4aef-8e78-917bd70043d0" />)
+<img width="1280" height="94" alt="image" src="https://github.com/user-attachments/assets/a11a3d11-8da1-4aef-8e78-917bd70043d0" />
 
 Чтобы выбрать `GATE_MIN_GAIN`, я посчитал std PR-AUC на 10 моделях, обученных с разными сидами, и взял gain в 2 раза больше, чем std. В результате новая версия становится чемпионом только при приросте, заметно превышающем шум обучения (std = `0.0016`, `GATE_MIN_GAIN` = `0.0032`).
 
@@ -27,11 +28,11 @@
 
 До отката:
 
-![До отката](<img width="1168" height="402" alt="image" src="https://github.com/user-attachments/assets/d04986ff-065e-4137-99cd-767a5ef5e1f7" />)
+<img width="1168" height="402" alt="image" src="https://github.com/user-attachments/assets/d04986ff-065e-4137-99cd-767a5ef5e1f7" />
 
 После отката:
 
-![После отката](<img width="1180" height="417" alt="image" src="https://github.com/user-attachments/assets/f968ffcc-6d63-4e84-8639-a8747a741c0c" />)
+<img width="1180" height="417" alt="image" src="https://github.com/user-attachments/assets/f968ffcc-6d63-4e84-8639-a8747a741c0c" />
 
 Прошло секунд 15, если считать вместе с затратами на написание команд.
 
@@ -39,23 +40,23 @@
 
 ## Задание 4
 
-Зелёный прогон: <https://github.com/OlegGayvoronsky/churn-service/actions/runs/37040751556>
+Зелёный прогон: https://github.com/OlegGayvoronsky/churn-service/actions/runs/37040751556
 
-![Задание 4, скриншот](<img width="1280" height="322" alt="image" src="https://github.com/user-attachments/assets/660284fb-b206-4e79-b21e-272ce970200a" />)
+<img width="1280" height="322" alt="image" src="https://github.com/user-attachments/assets/660284fb-b206-4e79-b21e-272ce970200a" />
 
 ---
 
 ## Задание 5
 
-![Задание 5, скриншот 1](<img width="1280" height="80" alt="image" src="https://github.com/user-attachments/assets/18b20249-e7e9-45f6-b800-28b1bc3edb8b" />)
+<img width="1280" height="80" alt="image" src="https://github.com/user-attachments/assets/18b20249-e7e9-45f6-b800-28b1bc3edb8b" />
 
-![Задание 5, скриншот 2](<img width="816" height="110" alt="image" src="https://github.com/user-attachments/assets/65f90e4f-d69d-49e2-848e-5f85814bf10f" />)
+<img width="816" height="110" alt="image" src="https://github.com/user-attachments/assets/65f90e4f-d69d-49e2-848e-5f85814bf10f" />
 
-![Задание 5, скриншот 3](<img width="1280" height="247" alt="image" src="https://github.com/user-attachments/assets/61023ca5-0631-46ce-8e52-55d6d42533e9" />)
+<img width="1280" height="247" alt="image" src="https://github.com/user-attachments/assets/61023ca5-0631-46ce-8e52-55d6d42533e9" />
 
-![Задание 5, скриншот 4](<img width="1002" height="800" alt="image" src="https://github.com/user-attachments/assets/305e1d3a-83a7-4150-8504-2384d986743c" />)
+<img width="1002" height="800" alt="image" src="https://github.com/user-attachments/assets/305e1d3a-83a7-4150-8504-2384d986743c" />
 
-![Задание 5, скриншот 5](<img width="991" height="770" alt="image" src="https://github.com/user-attachments/assets/075c1890-e6be-47da-b597-a466bb546719" />)
+<img width="991" height="770" alt="image" src="https://github.com/user-attachments/assets/075c1890-e6be-47da-b597-a466bb546719" />
 
 ---
 
@@ -63,17 +64,17 @@
 
 HPA в k9s:
 
-![k9s hpa](<img width="687" height="210" alt="image" src="https://github.com/user-attachments/assets/c79c2dee-85c3-4597-9a4e-336e72aa0d0b" />)
+<img width="687" height="210" alt="image" src="https://github.com/user-attachments/assets/c79c2dee-85c3-4597-9a4e-336e72aa0d0b" />
 
 События:
 
-![События](<img width="1280" height="130" alt="image" src="https://github.com/user-attachments/assets/a197aef6-7538-4f93-bada-c538065876bb" />)
+<img width="1280" height="130" alt="image" src="https://github.com/user-attachments/assets/a197aef6-7538-4f93-bada-c538065876bb" />
 
-| Прогон | Пользователи | Реплики (макс) | p95, мс | CPU на под, m | requests CPU | RPS | Ошибки |
-|---|---|---|---|---|---|---|---|
-| 1 | 20 | 4 | 13 | 39 | 100m | 16.5 | 0 |
-| 2 | 60 | 6 | 49 | 131 | 100m | 47.7 | 0 |
-| 3 | 150 | 6 | 1600 | 916 | 100m | 85.1 | 5 |
+| Прогон | Пользователи | Реплики (макс) | p95, мс | CPU на под, m | requests CPU | RPS  | Ошибки |
+| ------ | ------------ | -------------- | ------- | ------------- | ------------ | ---- | ------ |
+| 1      | 20           | 4              | 13      | 39            | 100m         | 16.5 | 0      |
+| 2      | 60           | 6              | 49      | 131           | 100m         | 47.7 | 0      |
+| 3      | 150          | 6              | 1600    | 916           | 100m         | 85.1 | 5      |
 
 На 150 пользователях один под выходит на ~900m. Из-за этой перегрузки пробы с коротким таймаутом начинают убивать поды. Поэтому появились 5 ошибок.
 
@@ -85,10 +86,10 @@ Requests до прогона: 256Mi, после: 200Mi.
 
 ### 1) Неверный алиас модели
 
-- Красный прогон: <https://github.com/OlegGayvoronsky/churn-service/actions/runs/37120414300>
-- Зелёный прогон: <https://github.com/OlegGayvoronsky/churn-service/actions/runs/37121496862>
-- Упало на шаге «сервис» с `error: timed out waiting for the condition`.
-- Вывод ошибки в логах пода:
+* Красный прогон: https://github.com/OlegGayvoronsky/churn-service/actions/runs/37120414300
+* Зелёный прогон: https://github.com/OlegGayvoronsky/churn-service/actions/runs/37121496862
+* Упало на шаге «сервис» с `error: timed out waiting for the condition`.
+* Вывод ошибки в логах пода:
 
 ```text
 mlflow.exceptions.RestException: INVALID_PARAMETER_VALUE: Registered model alias prod not found.
@@ -96,9 +97,9 @@ mlflow.exceptions.RestException: INVALID_PARAMETER_VALUE: Registered model alias
 
 ### 2) Неверное имя кластера
 
-- Красный прогон: <https://github.com/OlegGayvoronsky/churn-service/actions/runs/37121780942>
-- Зелёный прогон: <https://github.com/OlegGayvoronsky/churn-service/actions/runs/37121979632>
-- Упало на шаге «kind, kubectl и доступ к кластеру»:
+* Красный прогон: https://github.com/OlegGayvoronsky/churn-service/actions/runs/37121780942
+* Зелёный прогон: https://github.com/OlegGayvoronsky/churn-service/actions/runs/37121979632
+* Упало на шаге «kind, kubectl и доступ к кластеру»:
 
 ```text
 ERROR: could not locate any control plane nodes for cluster named 'churn-trashservice'. Use the --name option to select a different cluster
@@ -106,10 +107,10 @@ ERROR: could not locate any control plane nodes for cluster named 'churn-trashse
 
 ### 3) Падение smoke
 
-- Красный прогон: <https://github.com/OlegGayvoronsky/churn-service/actions/runs/37122576735>
-- Зелёный прогон: <https://github.com/OlegGayvoronsky/churn-service/actions/runs/37123267880/job/111203555448>
-- Упало на шаге smoke с `Error: Process completed with exit code 22`.
-- Лога, который подробно описывает ошибку в диагностике, найти не смог.
+* Красный прогон: https://github.com/OlegGayvoronsky/churn-service/actions/runs/37122576735
+* Зелёный прогон: https://github.com/OlegGayvoronsky/churn-service/actions/runs/37123267880
+* Упало на шаге smoke с `Error: Process completed with exit code 22`.
+* Лога, который подробно описывает ошибку в диагностике, найти не смог.
 
 ---
 
@@ -123,9 +124,9 @@ ERROR: could not locate any control plane nodes for cluster named 'churn-trashse
 
 ### 8.2
 
-- `--network kind` нужен, чтобы runner находился в докер сети, где и кластер kind и мог обращаться к его сервисам.
-- Docker socket нужен для управления докером с хоста, без него runner не сможет видеть контейнеры kind.
-- `--group-add 0` даёт процессу доступ к сокету докера через группу `root`, без него на сокете могут быть ошибки доступа к Docker daemon.
+* `--network kind` нужен, чтобы runner находился в докер сети, где и кластер kind и мог обращаться к его сервисам.
+* Docker socket нужен для управления докером с хоста, без него runner не сможет видеть контейнеры kind.
+* `--group-add 0` даёт процессу доступ к сокету докера через группу `root`, без него на сокете могут быть ошибки доступа к Docker daemon.
 
 ### 8.3
 
@@ -161,17 +162,17 @@ mlflow.exceptions.RestException: INVALID_PARAMETER_VALUE: Registered model alias
 
 Чтобы получить доступ к соответствующим данным нужно:
 
-- получить md5 хэш данных, на которых обучалась модель версии N;
-- найти коммит, где .dvc-файл содержал этот хеш;
-- затем подтянуть соответствующий этому коммиту .dvc файл из репозитория по команде git checkout;
-- запулить нужные данные из DVC хранилища при помощи uv run dvc pull.
+* получить md5 хэш данных, на которых обучалась модель версии N;
+* найти коммит, где .dvc-файл содержал этот хеш;
+* затем подтянуть соответствующий этому коммиту .dvc файл из репозитория по команде git checkout;
+* запулить нужные данные из DVC хранилища при помощи uv run dvc pull.
 
 ---
 
 ## Звёздочка 1
 
-- Без деплоя: <https://github.com/OlegGayvoronsky/churn-service/actions/runs/37040586764>
-- С деплоем: <https://github.com/OlegGayvoronsky/churn-service/actions/runs/37040751556>
+* Без деплоя: https://github.com/OlegGayvoronsky/churn-service/actions/runs/37040586764
+* С деплоем: https://github.com/OlegGayvoronsky/churn-service/actions/runs/37040751556
 
 ---
 
