@@ -1,37 +1,25 @@
 # Отчёт: churn-service
-
-## Содержание
-
-- [Задание 1](#задание-1)
-- [Задание 2](#задание-2)
-- [Задание 3](#задание-3)
-- [Задание 4](#задание-4)
-- [Задание 5](#задание-5)
-- [Задание 6](#задание-6)
-- [Задание 7](#задание-7)
-- [Задание 8](#задание-8)
-- [Звёздочка 1](#звёздочка-1)
-- [Журнал ошибок](#журнал-ошибок)
-
 ---
 
 ## Задание 1
 
-![Задание 1, скриншот 1](image.png)
+![Задание 1, скриншот 1](<img width="1088" height="375" alt="image" src="https://github.com/user-attachments/assets/22b5e5b6-36db-4d64-a0f8-af1c45a0353a" />)
 
-![Задание 1, скриншот 2](image-1.png)
+![Задание 1, скриншот 2](<img width="1280" height="686" alt="image" src="https://github.com/user-attachments/assets/78acabda-6b1b-4350-9be2-b0c1444ca336" />)
 
 ---
 
 ## Задание 2
 
-![Задание 2, скриншот 1](image-2.png)
+![Задание 2, скриншот 1](<img width="1280" height="653" alt="image" src="https://github.com/user-attachments/assets/b556e6ef-d5f6-4608-82e9-46bd846b4721" />)
 
-![Задание 2, скриншот 2](image-3.png)
+![Задание 2, скриншот 2](<img width="1280" height="91" alt="image" src="https://github.com/user-attachments/assets/7152f2f7-944b-463d-84d1-0de50bda2d58" />)
 
-![Задание 2, скриншот 3](image-4.png)
+![Задание 2, скриншот 3](<img width="1280" height="94" alt="image" src="https://github.com/user-attachments/assets/c1ee2874-9cc6-469f-87e3-fc4ff32dd369" />)
 
-**Метрика гейта и запас.** Метрикой гейта выбран PR-AUC: класс оттока редкий, поэтому PR-AUC честнее, чем ROC-AUC. Чтобы выбрать `GATE_MIN_GAIN`, я посчитал std PR-AUC на 10 моделях, обученных с разными сидами, и взял gain в 2 раза больше, чем std. Так новая версия становится champion только при приросте, заметно превышающем шум обучения (std = `<X>`, `GATE_MIN_GAIN` = `<2X>`).
+![Задание 2, скриншот 4](<img width="1280" height="94" alt="image" src="https://github.com/user-attachments/assets/a11a3d11-8da1-4aef-8e78-917bd70043d0" />)
+
+Чтобы выбрать `GATE_MIN_GAIN`, я посчитал std PR-AUC на 10 моделях, обученных с разными сидами, и взял gain в 2 раза больше, чем std. В результате новая версия становится чемпионом только при приросте, заметно превышающем шум обучения (std = `0.0016`, `GATE_MIN_GAIN` = `0.0032`).
 
 ---
 
@@ -39,11 +27,11 @@
 
 До отката:
 
-![До отката](image-5.png)
+![До отката](<img width="1168" height="402" alt="image" src="https://github.com/user-attachments/assets/d04986ff-065e-4137-99cd-767a5ef5e1f7" />)
 
 После отката:
 
-![После отката](image-6.png)
+![После отката](<img width="1180" height="417" alt="image" src="https://github.com/user-attachments/assets/f968ffcc-6d63-4e84-8639-a8747a741c0c" />)
 
 Прошло секунд 15, если считать вместе с затратами на написание команд.
 
@@ -53,33 +41,33 @@
 
 Зелёный прогон: <https://github.com/OlegGayvoronsky/churn-service/actions/runs/37040751556>
 
-![Задание 4, скриншот](image-7.png)
+![Задание 4, скриншот](<img width="1280" height="322" alt="image" src="https://github.com/user-attachments/assets/660284fb-b206-4e79-b21e-272ce970200a" />)
 
 ---
 
 ## Задание 5
 
-![Задание 5, скриншот 1](image-8.png)
+![Задание 5, скриншот 1](<img width="1280" height="80" alt="image" src="https://github.com/user-attachments/assets/18b20249-e7e9-45f6-b800-28b1bc3edb8b" />)
 
-![Задание 5, скриншот 2](image-9.png)
+![Задание 5, скриншот 2](<img width="816" height="110" alt="image" src="https://github.com/user-attachments/assets/65f90e4f-d69d-49e2-848e-5f85814bf10f" />)
 
-![Задание 5, скриншот 3](image-10.png)
+![Задание 5, скриншот 3](<img width="1280" height="247" alt="image" src="https://github.com/user-attachments/assets/61023ca5-0631-46ce-8e52-55d6d42533e9" />)
 
-![Задание 5, скриншот 4](image-11.png)
+![Задание 5, скриншот 4](<img width="1002" height="800" alt="image" src="https://github.com/user-attachments/assets/305e1d3a-83a7-4150-8504-2384d986743c" />)
 
-![Задание 5, скриншот 5](image-12.png)
+![Задание 5, скриншот 5](<img width="991" height="770" alt="image" src="https://github.com/user-attachments/assets/075c1890-e6be-47da-b597-a466bb546719" />)
 
 ---
 
 ## Задание 6
 
-k9s, HPA:
+HPA в k9s:
 
-![k9s hpa](image-13.png)
+![k9s hpa](<img width="687" height="210" alt="image" src="https://github.com/user-attachments/assets/c79c2dee-85c3-4597-9a4e-336e72aa0d0b" />)
 
 События:
 
-![События](image-14.png)
+![События](<img width="1280" height="130" alt="image" src="https://github.com/user-attachments/assets/a197aef6-7538-4f93-bada-c538065876bb" />)
 
 | Прогон | Пользователи | Реплики (макс) | p95, мс | CPU на под, m | requests CPU | RPS | Ошибки |
 |---|---|---|---|---|---|---|---|
