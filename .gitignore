@@ -4,7 +4,6 @@ __pycache__
 .pytest_cache/
 .ruff_cache/
 .env
-readme.docx
 ~WRL0003.tmp
 run10_stats.csv
 run50_stats.csv
@@ -13,3 +12,4 @@ runall_stats.csv
 */catboost_info/
 /catboost_info/
 results/
+data/
