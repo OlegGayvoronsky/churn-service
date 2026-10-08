@@ -9,9 +9,7 @@ data/
 k8s/
 tests/
 locustfile.py
-readme.docx
 experiments/
-~WRL0003.tmp
 run10_stats.csv
 run50_stats.csv
 run100_stats.csv
@@ -25,3 +23,10 @@ README2.md
 *catboost_info/
 results/
 loadtest.py
+dags/
+platform/
+scripts/
+.dvc/cache/
+.dvc/tmp/
+.dvc/config.local
+data/*.csv
