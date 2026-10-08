@@ -5,18 +5,17 @@ import uuid
 from contextlib import asynccontextmanager
 
 import pandas as pd
-from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, Query
-from prometheus_client import Counter, Gauge, Histogram
-from prometheus_fastapi_instrumentator import Instrumentator
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from prometheus_client import Counter, Gauge, Histogram
+from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel, Field
 from starlette.background import BackgroundTask
 
 from churn import db
 from churn.model_store import load_model
-
 
 PREDICTIONS = Counter("churn_predictions_total", "Predictions by class", ["churn"])
 SCORE = Histogram("churn_score", "Predicted churn probability", buckets=[i / 10 for i in range(11)])
