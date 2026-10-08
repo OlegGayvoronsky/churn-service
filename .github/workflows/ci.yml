@@ -127,8 +127,9 @@ jobs:
       
       - name: сервис
         run: |
-          kubectl apply -f k8s/
-          kubectl set image deploy/churn-service api="$IMAGE"
+          kubectl apply -f k8s/postgres.yaml
+          sed "s|churn-service:2.0|$IMAGE|" k8s/deployment.yaml | kubectl apply -f -
+          kubectl apply -f k8s/service.yaml -f k8s/ingress.yaml
           kubectl rollout status deploy/churn-service --timeout=180s
 
       - name: smoke
