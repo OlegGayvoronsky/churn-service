@@ -18,9 +18,43 @@ from churn import db
 from churn.model_store import load_model
 
 PREDICTIONS = Counter("churn_predictions_total", "Predictions by class", ["churn"])
-SCORE = Histogram("churn_score", "Predicted churn probability", buckets=[i / 10 for i in range(11)])
+SCORE = Histogram(
+    "churn_score",
+    "Predicted churn probability",
+    buckets=[i / 10 for i in range(11)]
+)
 MODEL_INFO = Gauge("churn_model_info", "Model loaded by this pod", ["version"])
-LATENCY_BUCKETS = (0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1)
+LATENCY_BUCKETS = buckets=(0.005, 0.01, 0.015, 0.02, 0.035, 0.05, 0.075, 0.1, 0.15, 0.25, 0.5, 1.0)
+
+BATCH_SIZE = Histogram(
+    "churn_batch_size", "Размер батча в /v1/predict/batch",
+    buckets=(1, 5, 10, 25, 50, 100, 250, 500),
+)
+
+NUM_FEATURES = {
+    "CreditScore": Histogram("churn_feature_credit_score", "CreditScore",
+        buckets=(350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850)),
+    "Age": Histogram("churn_feature_age", "Age",
+        buckets=(18, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 80, 100, 120)),
+    "Tenure": Histogram("churn_feature_tenure", "Tenure",
+        buckets=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)),
+    "Balance": Histogram("churn_feature_balance", "Balance",
+        buckets=(0, 10_000, 25_000, 50_000,
+                 75_000, 100_000, 125_000,
+                 150_000, 175_000, 200_000, 250_000
+                )),
+    "NumOfProducts": Histogram("churn_feature_num_of_products", "NumOfProducts",
+        buckets=(1, 2, 3, 4)),
+    "EstimatedSalary": Histogram("churn_feature_estimated_salary", "EstimatedSalary",
+        buckets=(0, 20_000, 40_000, 60_000, 80_000, 100_000,
+                 120_000, 140_000, 160_000, 180_000, 200_000,
+                 500_000, 1_000_000, 1_300_000, 1_600_000, 2_000_000
+                )),
+}
+
+def record_features(payload) -> None:
+    for name, hist in NUM_FEATURES.items():
+        hist.observe(getattr(payload, name))
 
 
 class Features(BaseModel):
@@ -164,6 +198,7 @@ def predict(x: Features, bg: BackgroundTasks) -> Prediction:
     churn = score >= app.state.meta["threshold"]
     PREDICTIONS.labels(str(churn).lower()).inc()
     SCORE.observe(score)
+    record_features(payload)
     
     return Prediction(
         score=score,
@@ -188,12 +223,14 @@ def predict_batch(x: BatchFeatures, bg: BackgroundTasks) -> list[Prediction]:
     scores = app.state.model.predict_proba(frame)[:, 1]
     latency_ms = round((time.perf_counter() - t0) * 1000, 2)
 
+    BATCH_SIZE.observe(len(payloads))
     results = []
 
     for payload, score in zip(payloads, scores, strict=True):
         request_id = str(uuid.uuid4())
         score = float(score)
         churn = score >= app.state.meta["threshold"]
+
         bg.add_task(
             db.save_prediction,
             request_id,
@@ -213,5 +250,9 @@ def predict_batch(x: BatchFeatures, bg: BackgroundTasks) -> list[Prediction]:
                 latency_ms=latency_ms,
             )
         )
+
+        PREDICTIONS.labels(str(churn).lower()).inc()
+        SCORE.observe(score)
+        record_features(payload)
 
     return results
