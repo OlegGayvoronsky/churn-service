@@ -54,7 +54,7 @@ NUM_FEATURES = {
 
 def record_features(payload) -> None:
     for name, hist in NUM_FEATURES.items():
-        hist.observe(getattr(payload, name))
+        hist.observe(payload[name])
 
 
 class Features(BaseModel):
