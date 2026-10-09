@@ -161,6 +161,8 @@ jobs:
             sleep 1
           done
           [ "$N" = "1" ] || { echo "в базе $N строк с request_id=$RID, ожидалась 1"; exit 1; }
+
+          curl --fail -s -H "$H" $U/metrics | grep -q '^churn_model_info{version="churn_catboost-v'
       
       - name: диагностика
         if: failure()
