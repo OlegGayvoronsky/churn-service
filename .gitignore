@@ -13,3 +13,7 @@ runall_stats.csv
 /catboost_info/
 results/
 data/
+.dvc/cache/
+.dvc/tmp/
+.dvc/config.local
+data/*.csv
