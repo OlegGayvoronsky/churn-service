@@ -34,7 +34,6 @@ SEED = 42
 
 GATE_MIN_GAIN = float(os.getenv("GATE_MIN_GAIN", "0.0032"))
 RECALL_TARGET = float(os.getenv("RECALL_TARGET", "0.75"))
-# SKOPS_TRUSTED = ["numpy.dtype", "sklearn.compose._column_transformer._RemainderColsList"]
 
 DROP = ['id', 'CustomerId']
 NUMERIC = [
