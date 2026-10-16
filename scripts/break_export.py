@@ -15,5 +15,5 @@ import pandas as pd
 PATH = Path("data/train.csv")
 df = pd.read_csv(PATH)
 df["Exited"] = 1.0 * (df["Exited"] == 0)
-df.to_parquet(PATH, index=False)
+df.to_csv(PATH, index=False)
 print(f"{PATH}: новые метки, доля классов {df['Exited'].mean():.2f}, строк {len(df)}")

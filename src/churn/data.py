@@ -110,7 +110,8 @@ EXPORT = pa.DataFrameSchema(
 
 
 def file_md5(path: Path) -> str:
-    """Тот же md5, что DVC пишет в .dvc-файл: по нему видно, на какой версии данных обучена модель."""
+    """Тот же md5, что DVC пишет в .dvc-файл:
+       по нему видно, на какой версии данных обучена модель."""
     return hashlib.md5(path.read_bytes()).hexdigest()
 
 
@@ -169,6 +170,7 @@ def load_clean(path: Path = RAW_PATH) -> pd.DataFrame:
 
 def main() -> int:
     import time
+
     import mlflow
 
     def mark(message):
@@ -178,12 +180,12 @@ def main() -> int:
     raw = load_raw()
     mark(f"CSV загружен: {len(raw)} строк")
 
-    mark(f"Начинаю очистку")
+    mark("Начинаю очистку")
     df = clean(raw)
-    mark(f"Очистка завершена")
+    mark("Очистка завершена")
     
     md5 = file_md5(RAW_PATH)
-    mark(f"md5 хэш посчитан")
+    mark("md5 хэш посчитан")
 
     mlflow.set_experiment(EXPERIMENT)
     mark("Эксперимент MLflow выбран")
@@ -197,7 +199,11 @@ def main() -> int:
         except pa.errors.SchemaErrors as e:
             fc = e.failure_cases
             
-            summary = fc.groupby(["column", "check"], dropna=False).size().rename("cases").reset_index()
+            summary = fc.groupby(
+                ["column", "check"],
+                dropna=False
+            ).size().rename("cases").reset_index()
+
             with tempfile.TemporaryDirectory() as tmp:
                 fc.head(1000).to_csv(Path(tmp) / "failure_cases.csv", index=False)
                 mlflow.log_artifact(str(Path(tmp) / "failure_cases.csv"))
@@ -212,7 +218,12 @@ def main() -> int:
         mlflow.set_tag("valid", "true")
         mlflow.log_metrics({"users": df["CustomerId"].nunique()})
     
-    result = {"valid": True, "data_md5": md5, "clean_rows": len(df), "users": int(df["CustomerId"].nunique())}
+    result = {
+        "valid": True,
+        "data_md5": md5,
+        "clean_rows": len(df),
+        "users": int(df["CustomerId"].nunique())
+    }
     print(json.dumps(result, ensure_ascii=False))
     return 0
 
