@@ -1,6 +1,5 @@
 .venv/
 .git/
-.gitignore
 __pycache__/
 .pytest_cache/
 .ruff_cache/
@@ -13,7 +12,7 @@ run10_stats.csv
 run50_stats.csv
 run100_stats.csv
 runall_stats.csv
-goot_batch.json
+good_batch.json
 good.json
 benchmark.py
 README.md
