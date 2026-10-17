@@ -37,8 +37,8 @@ kubectl -n mlops create secret generic s3-credentials \
 kubectl apply -f platform/s3.yaml -f platform/airflow.yaml
 
 echo "== Traefik, Prometheus и Grafana"
-helm repo add traefik https://traefik.github.io/charts >/dev/null 2>&1 || true
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts >/dev/null 2>&1 || true
+helm repo add traefik https://traefik.github.io/charts
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm upgrade --install traefik traefik/traefik --version 41.6.0 \
   -n traefik --create-namespace -f platform/traefik-values.yaml --wait
 helm upgrade --install monitoring prometheus-community/kube-prometheus-stack --version 91.5.2 \
