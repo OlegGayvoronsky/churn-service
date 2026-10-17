@@ -26,7 +26,7 @@ MODEL_NAME = os.getenv("MODEL_NAME", "churn_catboost")
 EXPERIMENT = os.getenv("MLFLOW_EXPERIMENT", "churn")
 
 ITERATIONS = int(os.getenv("ITERATIONS", "1000"))
-LEARNING_RATE = float(os.getenv("LEARNING_RATE", "0.1"))
+LEARNING_RATE = float(os.getenv("LEARNING_RATE", "0.01"))
 DEPTH = int(os.getenv("DEPTH", "3"))
 EVAL_METRIC = os.getenv("EVAL_METRIC", "AUC")
 EARLY_STOPPING_ROUNDS = int(os.getenv("EARLY_STOPPING_ROUNDS", "150"))
