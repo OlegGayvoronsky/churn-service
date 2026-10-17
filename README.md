@@ -1,224 +1,444 @@
-# Отчёт: churn-service
 
----
+# Bank Customer Churn Prediction
 
-## Задание 1
+Сервис машинного обучения для прогнозирования оттока клиентов банка.
 
-<img width="1088" height="375" alt="image" src="https://github.com/user-attachments/assets/22b5e5b6-36db-4d64-a0f8-af1c45a0353a" />
+## Содержание
 
-<img width="1280" height="686" alt="image" src="https://github.com/user-attachments/assets/78acabda-6b1b-4350-9be2-b0c1444ca336" />
+- [О проекте](#о-проекте)
+- [Результаты экспериментов](#результаты-экспериментов)
+- [Архитектура](#архитектура)
+- [Технологический стек](#технологический-стек)
+- [Quickstart](#quickstart)
+- [Развёртывание платформы](#развёртывание-платформы)
+- [Подготовка данных и DVC](#подготовка-данных-и-dvc)
+- [Обучение модели](#обучение-модели)
+- [Настройка CI](#настройка-ci)
+- [Проверка сервиса](#проверка-сервиса)
+- [Ручное переобучение](#ручное-переобучение)
+- [Адреса сервисов](#адреса-сервисов)
 
----
+## О проекте
 
-## Задание 2
+Сервис предназначен для прогнозирования вероятности оттока клиентов банка. Его задача — выявлять клиентов с повышенным риском ухода и помогать приоритизировать мероприятия по удержанию.
 
-<img width="1280" height="653" alt="image" src="https://github.com/user-attachments/assets/b556e6ef-d5f6-4608-82e9-46bd846b4721" />
+Для экспериментов использовался синтетический датасет [Bank Customer Churn Prediction Challenge](https://www.kaggle.com/competitions/bank-customer-churn-prediction-challenge/data?select=train.csv).
 
-<img width="1280" height="91" alt="image" src="https://github.com/user-attachments/assets/7152f2f7-944b-463d-84d1-0de50bda2d58" />
+В ходе разработки были протестированы две модели классификации:
 
-<img width="1280" height="94" alt="image" src="https://github.com/user-attachments/assets/c1ee2874-9cc6-469f-87e3-fc4ff32dd369" />
+- **Logistic Regression** — базовая модель для сравнения.
+- **CatBoost** — итоговая модель, выбранная по результатам экспериментов.
 
-<img width="1280" height="94" alt="image" src="https://github.com/user-attachments/assets/a11a3d11-8da1-4aef-8e78-917bd70043d0" />
+CatBoost показал лучшие значения всех рассматриваемых метрик. Рабочий порог классификации подбирается отдельно с учётом целевого значения `recall` и компромисса между полнотой выявления оттока и количеством ложноположительных предсказаний. Он не обязательно равен `0.5`.
 
-Чтобы выбрать `GATE_MIN_GAIN`, я посчитал std PR-AUC на 10 моделях, обученных с разными сидами, и взял gain в 2 раза больше, чем std. В результате новая версия становится чемпионом только при приросте, заметно превышающем шум обучения (std = `0.0016`, `GATE_MIN_GAIN` = `0.0032`).
+## Результаты экспериментов
 
----
+| Модель | ROC-AUC | PR-AUC | Precision@0.5 | Recall@0.5 | F1@0.5 |
+|:---|---:|---:|---:|---:|---:|
+| Logistic Regression | 0.886 | 0.718 | 0.752 | 0.559 | 0.641 |
+| **CatBoost** | **0.934** | **0.818** | **0.800** | **0.662** | **0.725** |
 
-## Задание 3
+*Метрики Precision, Recall и F1 в таблице рассчитаны при пороге классификации 0.5. Рабочий порог сервиса подбирается отдельно.*
 
-До отката:
+### Почему выбран CatBoost?
 
-<img width="1168" height="402" alt="image" src="https://github.com/user-attachments/assets/d04986ff-065e-4137-99cd-767a5ef5e1f7" />
+- **Лучшее качество ранжирования:** ROC-AUC составляет 0.934 против 0.886 у логистической регрессии.
+- **Лучшее выявление потенциального оттока:** PR-AUC составляет 0.818 против 0.718.
+- **Более высокая полнота и точность:** при пороге 0.5 Recall увеличился с 0.559 до 0.662, а Precision — с 0.752 до 0.800.
+- **Лучший баланс метрик:** F1 увеличился с 0.641 до 0.725.
 
-После отката:
+Таким образом, CatBoost позволяет лучше ранжировать клиентов по риску оттока и демонстрирует более высокие показатели качества на выбранных метриках. Отдельная настройка порога позволяет адаптировать модель к требованиям бизнес-задачи.
 
-<img width="1180" height="417" alt="image" src="https://github.com/user-attachments/assets/f968ffcc-6d63-4e84-8639-a8747a741c0c" />
+## Архитектура
 
-Прошло секунд 15, если считать вместе с затратами на написание команд.
+Сервис развёртывается в локальном Kubernetes-кластере `kind`. Управление Kubernetes-манифестами осуществляется через Helm.
 
----
+Основные компоненты:
 
-## Задание 4
+- **Kubernetes / kind** — оркестрация контейнеров.
+- **Helm** — управление конфигурацией и развёртыванием приложений.
+- **Traefik + Ingress** — маршрутизация входящего трафика к сервисам кластера.
+- **HPA (Horizontal Pod Autoscaler)** — горизонтальное масштабирование количества подов при изменении нагрузки.
+- **MLflow** — отслеживание экспериментов, параметров, метрик и моделей.
+- **Apache Airflow** — оркестрация процесса переобучения модели.
+- **DVC + S3-совместимое хранилище** — версионирование данных и хранение датасетов.
+- **Prometheus + Grafana** — сбор метрик и мониторинг состояния сервиса и инфраструктуры.
+- **GitHub Actions + self-hosted runner** — запуск CI workflow.
 
-Зелёный прогон: https://github.com/OlegGayvoronsky/churn-service/actions/runs/37040751556
+Архитектура объединяет обучение, версионирование данных, переобучение, развёртывание и мониторинг в единый ML-процесс.
 
-<img width="1280" height="322" alt="image" src="https://github.com/user-attachments/assets/660284fb-b206-4e79-b21e-272ce970200a" />
+## Технологический стек
 
----
+| Компонент | Назначение |
+|:---|:---|
+| Python | Разработка ML-сервиса |
+| CatBoost, scikit-learn | Обучение и оценка моделей |
+| MLflow | Трекинг экспериментов и моделей |
+| uv | Управление Python-зависимостями и окружением |
+| DVC | Версионирование данных |
+| S3-compatible storage | Хранение датасетов и артефактов |
+| Kubernetes (kind) | Запуск сервисов в кластере |
+| Helm | Управление манифестами |
+| Traefik, Ingress | Маршрутизация запросов |
+| HPA | Горизонтальное масштабирование |
+| Apache Airflow | Автоматизация переобучения |
+| Prometheus, Grafana | Мониторинг |
+| GitHub Actions | CI |
 
-## Задание 5
+# Quickstart
 
-<img width="1280" height="80" alt="image" src="https://github.com/user-attachments/assets/18b20249-e7e9-45f6-b800-28b1bc3edb8b" />
+## Предварительные требования
 
-<img width="816" height="110" alt="image" src="https://github.com/user-attachments/assets/65f90e4f-d69d-49e2-848e-5f85814bf10f" />
+Для запуска на Windows установите:
 
-<img width="1280" height="247" alt="image" src="https://github.com/user-attachments/assets/61023ca5-0631-46ce-8e52-55d6d42533e9" />
+1. [WSL 2](https://learn.microsoft.com/windows/wsl/install)
+2. [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+3. Git Bash
+4. Необходимые инструменты Kubernetes, Helm и Python — они устанавливаются или проверяются скриптами проекта.
 
-<img width="1002" height="800" alt="image" src="https://github.com/user-attachments/assets/305e1d3a-83a7-4150-8504-2384d986743c" />
+### 1. Установка WSL 2
 
-<img width="991" height="770" alt="image" src="https://github.com/user-attachments/assets/075c1890-e6be-47da-b597-a466bb546719" />
+Запустите PowerShell от имени администратора:
 
----
-
-## Задание 6
-
-HPA в k9s:
-
-<img width="687" height="210" alt="image" src="https://github.com/user-attachments/assets/c79c2dee-85c3-4597-9a4e-336e72aa0d0b" />
-
-События:
-
-<img width="1280" height="130" alt="image" src="https://github.com/user-attachments/assets/a197aef6-7538-4f93-bada-c538065876bb" />
-
-| Прогон | Пользователи | Реплики (макс) | p95, мс | CPU на под, m | requests CPU | RPS  | Ошибки |
-| ------ | ------------ | -------------- | ------- | ------------- | ------------ | ---- | ------ |
-| 1      | 20           | 4              | 13      | 39            | 100m         | 16.5 | 0      |
-| 2      | 60           | 6              | 49      | 131           | 100m         | 47.7 | 0      |
-| 3      | 150          | 6              | 1600    | 916           | 100m         | 85.1 | 5      |
-
-На 150 пользователях один под выходит на ~900m. Из-за этой перегрузки пробы с коротким таймаутом начинают убивать поды. Поэтому появились 5 ошибок.
-
-Requests до прогона: 256Mi, после: 200Mi.
-
----
-
-## Задание 7
-
-### 1) Неверный алиас модели
-
-* Красный прогон: https://github.com/OlegGayvoronsky/churn-service/actions/runs/37120414300
-* Зелёный прогон: https://github.com/OlegGayvoronsky/churn-service/actions/runs/37121496862
-* Упало на шаге «сервис» с `error: timed out waiting for the condition`.
-* Вывод ошибки в логах пода:
-
-```text
-mlflow.exceptions.RestException: INVALID_PARAMETER_VALUE: Registered model alias prod not found.
+```powershell
+wsl --install
+wsl --set-default-version 2
 ```
 
-### 2) Неверное имя кластера
+При необходимости перезагрузите компьютер.
 
-* Красный прогон: https://github.com/OlegGayvoronsky/churn-service/actions/runs/37121780942
-* Зелёный прогон: https://github.com/OlegGayvoronsky/churn-service/actions/runs/37121979632
-* Упало на шаге «kind, kubectl и доступ к кластеру»:
+### 2. Установка Docker Desktop
 
-```text
-ERROR: could not locate any control plane nodes for cluster named 'churn-trashservice'. Use the --name option to select a different cluster
+Скачайте и установите [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+
+При установке оставьте включённой опцию **Use WSL 2 instead of Hyper-V**.
+
+После установки откройте Docker Desktop и проверьте настройку:
+
+`Settings → General → Use the WSL 2 based engine`
+
+Убедитесь, что Docker Desktop запущен до выполнения следующих шагов.
+
+# Развёртывание платформы
+
+## Шаг 1. Создание собственного репозитория
+
+Сделайте fork исходного репозитория:
+
+[github.com/OlegGayvoronsky/churn-service](https://github.com/OlegGayvoronsky/churn-service)
+
+## Шаг 2. Клонирование репозитория
+
+Откройте PowerShell и выполните:
+
+```powershell
+git clone https://github.com/<GITHUB_USERNAME>/churn-service.git
+cd churn-service
 ```
 
-### 3) Падение smoke
+Замените `<GITHUB_USERNAME>` на имя своего GitHub-аккаунта.
 
-* Красный прогон: https://github.com/OlegGayvoronsky/churn-service/actions/runs/37122576735
-* Зелёный прогон: https://github.com/OlegGayvoronsky/churn-service/actions/runs/37123267880
-* Упало на шаге smoke с `Error: Process completed with exit code 22`.
-* Лога, который подробно описывает ошибку в диагностике, найти не смог.
+## Шаг 3. Установка базовых зависимостей
 
----
+В PowerShell из корня проекта выполните:
 
-## Задание 8
-
-### 8.1
-
-Потому что в процессе deploy нужен доступ к кластеру, запущенному у меня на компьютере за NAT. В случае тестов и build доступ к кластеру не нужен.
-
-В качестве альтернативы можно открыть кластер наружу через туннель или поставить GitOps-агента, который сам забирает манифесты из репозитория. Но runner проще, так как он сам подключается к Github.
-
-### 8.2
-
-* `--network kind` нужен, чтобы runner находился в докер сети, где и кластер kind и мог обращаться к его сервисам.
-* Docker socket нужен для управления докером с хоста, без него runner не сможет видеть контейнеры kind.
-* `--group-add 0` даёт процессу доступ к сокету докера через группу `root`, без него на сокете могут быть ошибки доступа к Docker daemon.
-
-### 8.3
-
-Мы изменили для того, чтобы при последующих деплоях секрет обновлялся, а не создавался заново. Иначе будет ошибка при попытке создать секрет, так как секрет с таким именем уже существует.
-
-### 8.4
-
-champion - текущая лучшая модель, а challenger - новая модель, которая претендует стать лучшей. Сервис просит алиас, потому что в таком случае для смены модели можно просто переставить алиас в mlflow на другую модель и перезапустить поды. Поэтому откат модели через алиас не меняет больше ничего, кроме самой модели, в то время как rollout undo откатывает манифесты и версию кода контейнера.
-
-### 8.5
-
-Если задеплоить сервис в кластер, где никто ещё не обучил модель, то в таком случае деплой упадет на шаге сервиса, как было в задании 7, при указании неверного алиаса. Чтобы это увидеть, можно посмотреть в логи пода в k9s или сi, где будет написано:
-
-```text
-mlflow.exceptions.RestException: INVALID_PARAMETER_VALUE: Registered model alias prod not found.
+```powershell
+powershell -ExecutionPolicy Bypass -File ./tools/basic_preparation.ps1
 ```
 
-### 8.6
+Дождитесь завершения скрипта.
 
-Запрос из браузера к `http://mlflow.localhost` приходит на `127.0.0.1:80`, затем перенаправляется на порт `30080` ноды. Затем traefik по ingress правилу отправляет запрос в Service `mlflow:5000`, который направляет его в под mlflow на `targetPort 5000`.
+## Шаг 4. Запуск платформы
 
-`--allowed-hosts` ограничивает допустимые значения хостов. `--cors-allowed-origins` разрешает браузерные запросы с указанного адреса. Порт 80 задаётся при создании kind-кластера, потому что `extraPortMappings` настраивает проброс порта хоста в контейнер kind-ноды, а не является обычным Kubernetes-ресурсом. Порт 80 до создания кластера задается, чтобы выполнить проброс с порта 80 хоста на порт контейнера ноды 30080, после создания кластера выполнить пробросс не получится.
+Перейдите в Git Bash, откройте корень проекта и выберите один из вариантов запуска.
 
-### 8.7
-
-Если считать для прогона с 60 пользователями по таблице сверху (уже для 6 реплик):
-
-Получится 6 * 131% / 60 с округлением вверх, что примерно равно 14. Но поскольку количество реплик ограничено сверху 6-ю, поэтому число репоик не поменялось. Вниз реплики уходили дольше из-за задержки в 5 минут, чтобы потом не пришлось заново поднимать реплики при кратковременном спаде.
-
-### 8.8
-
-В git лежит .dvc файл с хэшом, который позволяет получить доступ к файлу, который лежит в DVC.
-
-Чтобы получить доступ к соответствующим данным нужно:
-
-* получить md5 хэш данных, на которых обучалась модель версии N;
-* найти коммит, где .dvc-файл содержал этот хеш;
-* затем подтянуть соответствующий этому коммиту .dvc файл из репозитория по команде git checkout;
-* запулить нужные данные из DVC хранилища при помощи uv run dvc pull.
-
----
-
-## Звёздочка 1
-
-* Без деплоя: https://github.com/OlegGayvoronsky/churn-service/actions/runs/37040586764
-* С деплоем: https://github.com/OlegGayvoronsky/churn-service/actions/runs/37040751556
-
----
-
-## Журнал ошибок
-
-### 1) Неправильное имя модели в ConfigMap
-
-Сервис искал в реестре не ту модель, которая была зарегистрирована.
-
-### 2) Другая команда запуска раннера
-
-Git Bash переписывал путь `/var/run/docker.sock`, поэтому путь к сокету пришлось указать с двойным слешем (`//var/run/docker.sock`). Рабочая команда:
+**Базовый запуск:**
 
 ```bash
-docker run -d --name gh-runner --network kind --group-add 0 --restart unless-stopped \
-  -v //var/run/docker.sock:/var/run/docker.sock \
-  -e REPO_URL=https://github.com/OlegGayvoronsky/churn-service \
-  -e RUNNER_TOKEN=<токен> \
-  ghcr.io/actions/actions-runner:2.337.0 \
-  bash -c '[ -f .runner ] || ./config.sh --unattended --url $REPO_URL --token $RUNNER_TOKEN --name churn-service-kind --labels kind; ./run.sh'
+bash platform/up.sh
 ```
 
-### 3) Забыл `\` и `-` в команде подтягивания секретов
-
-Без `\` в конце строки команда `kubectl create secret` выполнялась без `--dry-run=client`, а без `-` после `-f` у `kubectl apply` не было аргумента.
-
-### 4) Пароль в Postgres не совпадал с секретом
-
-Пароль в уже запущенном postgres поде не совпадал с паролем в secrets на github. Добавил в `ci.yml`:
-
-```yaml
-      - name: пароль в базе = секрет
-        env:
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: |
-          echo "ALTER USER postgres PASSWORD :'pw';" | \
-            kubectl exec -i deploy/postgres -- psql -U postgres -v pw="$DB_PASSWORD"
-```
-
-А также пришлось принудительно поменять пароль в github secrets и для пода на один и тот же:
+**Запуск с другим именем кластера:**
 
 ```bash
-kubectl exec deploy/postgres -- psql -U postgres -c "ALTER USER postgres PASSWORD '<DB_PASSWORD>'"
-kubectl rollout restart deploy/churn-service
+CLUSTER=name bash platform/up.sh
 ```
 
-### 5) Поле `replicas` в Deployment
+Если используется другое имя кластера, укажите такое же имя в настройке `KIND_CLUSTER` в CI workflow.
 
-Убрал реплики в deployment, без этого smoke падал с ошибкой 4.
+**Запуск с собственными ключами S3:**
+
+```bash
+S3_KEY=... S3_SECRET=... bash platform/up.sh
+```
+
+При использовании собственных ключей сохраните их для настройки DVC на следующем этапе.
+
+Дождитесь завершения развёртывания платформы.
+
+# Подготовка данных и DVC
+
+## Шаг 5. Загрузка датасета
+
+Скачайте файл `train.csv`:
+
+[Скачать train.csv с Google Drive](https://drive.google.com/file/d/1CFmiIVo3OWq0vmOV6-2C6IvVEfV725Pe/view?usp=sharing)
+
+Поместите файл в каталог `data` в корне проекта:
+
+```text
+churn-service/
+└── data/
+    └── train.csv
+```
+
+## Шаг 6. Настройка доступа к S3 для DVC
+
+Настройте локальные параметры доступа к удалённому хранилищу `laptop`.
+
+### Вариант A. Использованы ключи по умолчанию
+
+В Git Bash выполните:
+
+```bash
+uv run dvc remote modify --local laptop access_key_id dvcadmin
+uv run dvc remote modify --local laptop secret_access_key dvc-secret-123
+```
+
+### Вариант B. Использованы собственные ключи
+
+```bash
+uv run dvc remote modify --local laptop access_key_id <S3_KEY>
+uv run dvc remote modify --local laptop secret_access_key <S3_SECRET>
+```
+
+Замените значения на свои ключи.
+
+> **Важно:** не добавляйте реальные ключи доступа в Git. Параметр `--local` предназначен для локальной конфигурации DVC, не попадающей в общий Git-конфиг проекта.
+
+## Проверка доступа к `*.localhost` из Python
+
+Браузер и `curl` могут успешно обращаться к адресам `*.localhost`, в то время как Python-клиенты, включая MLflow и DVC, могут использовать системные настройки прокси или иначе разрешать имена.
+
+Перед первым `dvc pull` или `dvc push` проверьте разрешение имени хранилища.
+
+### 1. Проверка DNS
+
+```bash
+uv run python -c "import socket; print(socket.gethostbyname('s3.localhost'))"
+```
+
+Ожидаемый результат:
+
+```text
+127.0.0.1
+```
+
+Если имя не разрешается, выполните следующий шаг.
+
+### 2. Добавление адресов в hosts
+
+**Windows:** откройте PowerShell от имени администратора и выполните:
+
+```powershell
+Add-Content -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Value "`n127.0.0.1 s3.localhost s3-console.localhost mlflow.localhost airflow.localhost grafana.localhost churn-service.localhost"
+ipconfig /flushdns
+```
+
+**Linux / macOS:**
+
+```bash
+echo "127.0.0.1 s3.localhost s3-console.localhost mlflow.localhost airflow.localhost grafana.localhost churn-service.localhost" | sudo tee -a /etc/hosts
+```
+
+Повторите DNS-проверку. Она должна вернуть `127.0.0.1`.
+
+> Если сервисы доступны только через настроенный локальный прокси или туннель, проверьте конфигурацию маршрутизации: запись в `hosts` сама по себе не запускает и не перенаправляет сервисы.
+
+## Шаг 7. Отправка данных в S3
+
+После настройки доступа выполните:
+
+```bash
+uv run dvc push
+```
+
+DVC отправит файлы, отслеживаемые в его конфигурации, в удалённое хранилище.
+
+### Если `dvc push` или `dvc pull` возвращает 503, зависает или работает медленно
+
+Возможная причина — системный прокси, через который направляются запросы к локальным адресам.
+
+Проверьте гипотезу разовым запуском:
+
+```bash
+NO_PROXY="localhost,127.0.0.1,.localhost" uv run dvc push
+```
+
+Если команда успешно выполняется, добавьте исключения из прокси в окружение пользователя.
+
+**Windows PowerShell:**
+
+```powershell
+setx NO_PROXY "localhost,127.0.0.1,.localhost"
+```
+
+**Linux / macOS:** добавьте в `~/.bashrc` или `~/.zshrc`:
+
+```bash
+export NO_PROXY="localhost,127.0.0.1,.localhost"
+```
+
+После изменения откройте новый терминал и повторите операцию.
+
+# Обучение модели
+
+## Шаг 8. Запуск обучения
+
+После запуска платформы и подготовки данных выполните из корня проекта:
+
+```bash
+MLFLOW_TRACKING_URI=http://mlflow.localhost uv run python -m churn.train
+```
+
+Команда запускает обучение и отправляет результаты эксперимента в MLflow.
+
+Дождитесь завершения процесса и проверьте результаты в интерфейсе MLflow.
+
+# Настройка CI
+
+## Шаг 9. Создание self-hosted runner
+
+Откройте свой GitHub-репозиторий:
+
+`Settings → Actions → Runners`
+
+Создайте новый **self-hosted runner** для Linux.
+
+Скопируйте токен, отображаемый в инструкции `Configure`, и сохраните его для запуска runner. Не публикуйте токен в репозитории или логах.
+
+## Шаг 10. Запуск runner
+
+Из Git Bash выполните:
+
+```bash
+REPO_URL=https://github.com/<GITHUB_USERNAME>/churn-service \
+RUNNER_TOKEN=<RUNNER_TOKEN> \
+bash tools/runner-up.sh
+```
+
+Замените `<GITHUB_USERNAME>` и `<RUNNER_TOKEN>` своими значениями.
+
+Оставьте runner запущенным, чтобы GitHub Actions мог отправлять на него задания.
+
+## Шаг 11. Настройка секрета базы данных
+
+В репозитории GitHub откройте:
+
+`Settings → Secrets and variables → Actions`
+
+Создайте repository secret с именем:
+
+```text
+DB_PASSWORD
+```
+
+В качестве значения укажите пароль, необходимый workflow.
+
+## Шаг 12. Запуск CI workflow
+
+1. Откройте вкладку **Actions** в GitHub.
+2. Выберите workflow `ci`.
+3. Нажмите **Run workflow**.
+4. Дождитесь завершения выполнения и проверьте логи.
+
+# Проверка сервиса
+
+После развёртывания платформы и запуска необходимых компонентов отправьте запрос на предсказание.
+
+Пример для PowerShell или Git Bash в Windows:
+
+```bash
+curl.exe -X POST "http://churn-service.localhost/v1/predict" \
+  -H "Content-Type: application/json" \
+  -d "@good.json"
+```
+
+Файл `good.json` должен содержать входные данные в формате, который ожидает API сервиса.
+
+Проверьте HTTP-статус и тело ответа. Если сервис недоступен, убедитесь, что поды готовы, Ingress настроен, а домен `churn-service.localhost` разрешается в правильный локальный адрес.
+
+# Ручное переобучение
+
+Переобучение можно запустить через Airflow или после обновления датасета.
+
+## Вариант 1. Переобучение на новых данных
+
+### 1. Обновите датасет
+
+Поместите новый `train.csv` в каталог `data/`.
+
+### 2. Обновите версию данных в DVC
+
+```bash
+uv run dvc add data/train.csv
+```
+
+### 3. Отправьте данные в удалённое хранилище
+
+```bash
+uv run dvc push
+```
+
+### 4. Зафиксируйте изменения в Git
+
+```bash
+git add .
+git commit -m "Update churn training dataset"
+git push
+```
+
+### 5. Запустите CI workflow
+
+Перейдите в GitHub → Actions → `ci` и нажмите **Run workflow**, если обновлённый процесс обучения предусмотрен этим workflow.
+
+## Вариант 2. Запуск через Airflow
+
+1. Откройте [http://airflow.localhost](http://airflow.localhost).
+2. Перейдите к списку DAG.
+3. Найдите DAG `churn_retrain`.
+4. Запустите DAG вручную.
+5. Откройте страницу DAG Run и отслеживайте состояние задач.
+6. Дождитесь успешного завершения переобучения.
+
+Убедитесь, что Airflow использует актуальную версию данных и корректно настроен доступ к MLflow и S3.
+
+# Адреса сервисов
+
+После успешного запуска платформы сервисы доступны по следующим адресам:
+
+| Сервис | URL | Назначение |
+|:---|:---|:---|
+| MLflow | [http://mlflow.localhost](http://mlflow.localhost) | Эксперименты и модели |
+| Airflow | [http://airflow.localhost](http://airflow.localhost) | Оркестрация переобучения |
+| Grafana | [http://grafana.localhost](http://grafana.localhost) | Мониторинг и дашборды |
+| S3 Console | [http://s3-console.localhost/rustfs/console/index.html](http://s3-console.localhost/rustfs/console/index.html) | Управление объектным хранилищем |
+| Churn Service | [http://churn-service.localhost](http://churn-service.localhost) | API сервиса |
+
+Для локального стенда могут использоваться следующие учётные данные по умолчанию:
+
+- **Grafana:** `admin / admin`
+- **S3 Console:** `dvcadmin / dvc-secret-123`
+
+Если при развёртывании были заданы собственные ключи S3, используйте их вместо значений по умолчанию.
+
+> Учётные данные по умолчанию предназначены только для локального учебного стенда. Не используйте их в публично доступной среде.
+
+---
+
+## Примечания
+
+- Все команды предполагают запуск из корня репозитория, если не указано иное.
+- Для корректной работы локальных доменов должны быть запущены необходимые компоненты платформы и настроена маршрутизация.
+- Для воспроизводимости обучения используйте версии данных, зафиксированные в DVC, и зависимости, зафиксированные в `uv.lock`.
+- Не храните токены, пароли и реальные ключи доступа в Git.
