@@ -15,9 +15,7 @@ runall_stats.csv
 good_batch.json
 good.json
 benchmark.py
-README.md
-README1.md
-README2.md
+*.md
 *catboost_info/
 results/
 loadtest.py
@@ -28,3 +26,4 @@ scripts/
 .dvc/tmp/
 .dvc/config.local
 data/*.csv
+assets/
