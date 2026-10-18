@@ -311,7 +311,7 @@ MLFLOW_TRACKING_URI=http://mlflow.localhost uv run python -m churn.train
 ```bash
 REPO_URL=https://github.com/<GITHUB_USERNAME>/<REPOSITORY_NAME> \
 RUNNER_TOKEN=<RUNNER_TOKEN> \
-bash tools/runner_up.sh
+bash ./tools/runner_up.sh
 ```
 
 Замените `<GITHUB_USERNAME>` и `<RUNNER_TOKEN>` своими значениями.
