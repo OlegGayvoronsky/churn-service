@@ -1,5 +1,61 @@
 # Отчёт
 
+## Схема системы
+
+Всё работает внутри кластер `kind` (`churn-service`). Порт 80 хоста ведёт в Traefik, все адреса `*.localhost` попадают туда же и разводятся по имени хоста.
+
+### Компоненты и их роли
+
+| Namespace | Компонент | Роль |
+|---|---|---|
+| `traefik` | Traefik | Единственная точка входа, маршрутизация по Ingress (NodePort 30080) |
+| `mlops` | MLflow | Эксперименты и реестр моделей, том `mlflow-data` (SQLite + файлы артефактов) |
+| `mlops` | Airflow | Оркестрация переобучения (DAG `churn_retrain`) |
+| `mlops` | RustFS | S3-хранилище данных DVC, бакет `dvc` |
+| `monitoring` | Prometheus | Сбор метрик |
+| `monitoring` | Grafana | Дашборды |
+| `default` | churn-service | `api` контейнер сервиса на FastAPI (uvicorn, порт 8000), масштабируется через HPA |
+| `default` | Postgres | БД `churn`, таблица `predictions` (логи запросов) |
+| вне кластера | GitHub Actions + self-hosted runner | Тесты, сборка образа в ghcr, деплой в kind |
+
+###  Порядок вызовов
+
+```text
+Клиент ──> churn-service.localhost ──> Traefik ──> Service churn-service ──> под (api сервиса)
+                                                                              │
+                                      ┌───────────────────────────────────────┤
+                                      ▼                                       ▼
+                               Postgres (predictions)               /metrics, /health
+                               запись в фоне                                ▲
+                                                                            │
+                                                  Prometheus (ServiceMonitor) ──> Grafana
+
+Airflow DAG ──> под переобучения, образ из переменной churn_image
+                   ├─ dvc pull ──> RustFS
+                   ├─ проверка данных через Pandera
+                   ├─ обучение CatBoost ──> MLflow
+                   └─ сравнение по PR-AUC ──> при выигрыше ставится алиас champion
+
+Разработчик: dvc push ──> s3.localhost ──> Traefik ──> RustFS
+             git push ──> GitHub Actions ──> образ в ghcr ──> деплой на runner по кнопке ──> kind
+```
+
+1. **Предсказание.** Запрос приходит в Traefik, затем в Service и под с api сервиса. Под считает score моделью с алиасом `champion`, отвечает клиенту и в фоне пишет строку в Postgres. Это касается и запросов с ошибкой 422.
+2. **Мониторинг.** Prometheus забирает `/metrics` у подов по ServiceMonitor. Grafana строит дашборд из Prometheus.
+3. **Переобучение.** Airflow запускает под с образом сервиса: `dvc pull` из RustFS, проверка данных через Pandera, обучение CatBoost, запись run в MLflow, сравнение по PR-AUC и перенос алиаса `champion`, если новая модель лучше. Чтобы поды сервиса начали использовать новую модель, их нужно перезапустить.
+4. **Данные.** `dvc push` отправляет файлы в RustFS через `s3.localhost`. В Git уходит только указатель `.dvc`.
+5. **CI/CD.** Workflow `ci`: тесты и `ruff` (на push и pull request), build образа (только на `main`), деплой (только по кнопке) на self-hosted runner.
+
+## Кто что хранит
+
+| Что | Где лежит | Как найти нужную версию |
+|---|---|---|
+| **Код** | GitHub | Чтобы найти нужную версию, используется Commit SHA. `git checkout <sha>` возвращает код и версии зависимостей. SHA записан в теге образа. |
+| **Данные** | Файлы в бакете `dvc` в RustFS. В Git лежит только `data/train.csv.dvc` с md5 | Берём `.dvc` из нужного коммита и выполняем `uv run dvc checkout` или `dvc pull`. md5 датасета сохранён в MLflow run. |
+| **Модель** | MLflow (`mlflow.localhost`) в томе `mlflow-data`: метаданные в SQLite, файлы моделей в `/mlflow/artifacts` | Актуальную версию показывает алиас `champion`. Версию, запущенную в подах, видно в `/health` в поле `model_version` и в метрике `churn_model_info`. Для воспроизведения открываем метаданные модели в run, находим параметры, md5 данных, SHA (при наличии) |
+| **Образ** | ghcr.io: `ghcr.io/<репозиторий>:sha-<полный SHA коммита>`. Внутри код, зависимости по `uv.lock`, указатели `.dvc` | Версия определяется по SHA в теге. Чтобы понять, что запущено сейчас, нужно выполнить: `kubectl get deploy churn-service -o jsonpath='{.spec.template.spec.containers[0].image}'`. CI переопределяет образ через `kubectl set image`. |
+| **Логи запросов** | Таблица `predictions` в БД `churn` в Postgres кластере. | |
+
 ## Задание 1
 
 ![alt text](assets/image.png)
@@ -68,7 +124,7 @@
 
 ### 1
 
-Открываем нужный эксперимент и Run, связанный с версией модели. Сохраняем `run_id`, `experiment_id`, параметры обучения, а также Git commit SHA и MD5 hash датасета.
+Открываем нужный эксперимент и Run, связанный с версией модели. Сохраняем `run_id`, `experiment_id`, параметры обучения, а также Git commit SHA (при наличии, у меня не реализовано) и MD5 hash датасета.
 
 Чтобы восстановить код, по SHA возвращаемся к нужной версии проекта, включая `train.py`, `pyproject.toml` и `uv.lock`:
 
