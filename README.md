@@ -132,7 +132,7 @@ wsl --set-default-version 2
 Откройте PowerShell и выполните:
 
 ```powershell
-git clone https://github.com/<GITHUB_USERNAME>/churn-service.git
+git clone https://github.com/<GITHUB_USERNAME>/<REPOSITORY_NAME>.git
 cd churn-service
 ```
 
@@ -234,7 +234,7 @@ uv run python -c "import socket; print(socket.gethostbyname('s3.localhost'))"
 127.0.0.1
 ```
 
-Если имя не разрешается, выполните следующий шаг.
+Если появляется `getaddrinfo failed`, выполните следующий шаг.
 
 ### 2. Добавление адресов в hosts
 
@@ -245,27 +245,20 @@ Add-Content -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Value "`n127.0.0
 ipconfig /flushdns
 ```
 
-**Linux / macOS:**
-
-```bash
-echo "127.0.0.1 s3.localhost s3-console.localhost mlflow.localhost airflow.localhost grafana.localhost churn-service.localhost" | sudo tee -a /etc/hosts
-```
-
 Повторите DNS-проверку. Она должна вернуть `127.0.0.1`.
-
-> Если сервисы доступны только через настроенный локальный прокси или туннель, проверьте конфигурацию маршрутизации: запись в `hosts` сама по себе не запускает и не перенаправляет сервисы.
 
 ## Шаг 7. Отправка данных в S3
 
 После настройки доступа выполните:
 
 ```bash
+uv run dvc add data/train.csv
 uv run dvc push
 ```
 
 DVC отправит файлы, отслеживаемые в его конфигурации, в удалённое хранилище.
 
-### Если `dvc push` или `dvc pull` возвращает 503, зависает или работает медленно
+### Если `dvc push` или `dvc pull` возвращает 499\503, зависает или работает медленно
 
 Возможная причина — системный прокси, через который направляются запросы к локальным адресам.
 
@@ -275,18 +268,12 @@ DVC отправит файлы, отслеживаемые в его конфи
 NO_PROXY="localhost,127.0.0.1,.localhost" uv run dvc push
 ```
 
-Если команда успешно выполняется, добавьте исключения из прокси в окружение пользователя.
+Если команда успешно выполняется, можете добавить исключения из прокси в окружение пользователя.
 
-**Windows PowerShell:**
+**(Опционально) Windows PowerShell:**
 
 ```powershell
 setx NO_PROXY "localhost,127.0.0.1,.localhost"
-```
-
-**Linux / macOS:** добавьте в `~/.bashrc` или `~/.zshrc`:
-
-```bash
-export NO_PROXY="localhost,127.0.0.1,.localhost"
 ```
 
 После изменения откройте новый терминал и повторите операцию.
@@ -322,9 +309,9 @@ MLFLOW_TRACKING_URI=http://mlflow.localhost uv run python -m churn.train
 Из Git Bash выполните:
 
 ```bash
-REPO_URL=https://github.com/<GITHUB_USERNAME>/churn-service \
+REPO_URL=https://github.com/<GITHUB_USERNAME>/<REPOSITORY_NAME> \
 RUNNER_TOKEN=<RUNNER_TOKEN> \
-bash tools/runner-up.sh
+bash tools/runner_up.sh
 ```
 
 Замените `<GITHUB_USERNAME>` и `<RUNNER_TOKEN>` своими значениями.
