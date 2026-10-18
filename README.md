@@ -372,7 +372,7 @@ curl.exe -X POST "http://churn-service.localhost/v1/predict" \
 
 Переобучение можно запустить через Airflow или после обновления датасета.
 
-## Вариант 1. Переобучение на новых данных
+## Шаг 1. Опциональный - переобучение на новых данных
 
 ### 1. Обновите датасет
 
@@ -400,9 +400,9 @@ git push
 
 ### 5. Запустите CI workflow
 
-Перейдите в GitHub → Actions → `ci` и нажмите **Run workflow**, если обновлённый процесс обучения предусмотрен этим workflow.
+Перейдите в GitHub → Actions → `ci` и нажмите **Run workflow**.
 
-## Вариант 2. Запуск через Airflow
+## Шаг 2. Запуск обучения через Airflow
 
 1. Откройте [http://airflow.localhost](http://airflow.localhost).
 2. Перейдите к списку DAG.
