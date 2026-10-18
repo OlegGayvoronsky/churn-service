@@ -182,7 +182,7 @@ S3_KEY=... S3_SECRET=... bash platform/up.sh
 
 Скачайте файл `train.csv`:
 
-[Скачать train.csv с Google Drive](https://drive.google.com/file/d/1CFmiIVo3OWq0vmOV6-2C6IvVEfV725Pe/view?usp=sharing)
+[Скачать train.csv с Google Drive](https://drive.google.com/file/d/1CFmiIVo3OWq0vmOV6-2C6IvVEVf725Pe/view?usp=sharing)
 
 Поместите файл в каталог `data` в корне проекта:
 
