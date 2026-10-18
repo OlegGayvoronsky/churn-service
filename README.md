@@ -133,7 +133,7 @@ wsl --set-default-version 2
 
 ```powershell
 git clone https://github.com/<GITHUB_USERNAME>/<REPOSITORY_NAME>.git
-cd churn-service
+cd <REPOSITORY_NAME>
 ```
 
 Замените `<GITHUB_USERNAME>` на имя своего GitHub-аккаунта.
