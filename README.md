@@ -136,7 +136,7 @@ git clone https://github.com/<GITHUB_USERNAME>/<REPOSITORY_NAME>.git
 cd <REPOSITORY_NAME>
 ```
 
-Замените `<GITHUB_USERNAME>` на имя своего GitHub-аккаунта.
+Замените `<GITHUB_USERNAME>` и `<REPOSITORY_NAME>` своими значениями.
 
 ## Шаг 3. Установка базовых зависимостей
 
@@ -291,6 +291,15 @@ MLFLOW_TRACKING_URI=http://mlflow.localhost uv run python -m churn.train
 Команда запускает обучение и отправляет результаты эксперимента в MLflow.
 
 Дождитесь завершения процесса и проверьте результаты в интерфейсе MLflow.
+
+Если обучение падает с ошибкой кодировки, попробуйте запустить обучение в bash терминале visual studio code.
+
+Либо выполните:
+```bash
+export PYTHONIOENCODING=utf-8
+```
+
+Затем снова запустите обучение.
 
 # Настройка CI
 
