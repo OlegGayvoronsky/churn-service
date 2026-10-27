@@ -127,6 +127,18 @@ wsl --set-default-version 2
 
 [github.com/OlegGayvoronsky/churn-service](https://github.com/OlegGayvoronsky/churn-service)
 
+Включение GitHub Actions
+
+После создания форка репозитория на GitHub необходимо включить GitHub Actions:
+
+Откройте свой форк репозитория на GitHub.
+
+Перейдите во вкладку Actions.
+
+Если GitHub предложит включить рабочие процессы (workflows), нажмите I understand my workflows, go ahead and enable them («Я понимаю, как работают мои рабочие процессы, включить их»).
+
+Если GitHub Actions недоступны, откройте Settings → Actions → General и проверьте, разрешено ли выполнение Actions для репозитория.
+
 ## Шаг 2. Клонирование репозитория
 
 Откройте PowerShell и выполните:
