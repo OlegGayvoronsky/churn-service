@@ -327,30 +327,9 @@ Airflow предназначен только для того, чтобы орк
 
 ## Переделки
 
-  ----------------------------------------------------------------------------------
-  Пункт обратной связи    Что сделано             Ссылка на коммит или прогон
-  ----------------------- ----------------------- ----------------------------------
-  На Windows Quickstart   Добавлено правило       
-  падал на шаге 4: у      `*.sh text eol=lf` в    
-  `platform/up.sh` могли  `.gitattributes`, чтобы `[0d20666](https://github.com/OlegGayvoronsky/churn-service/commit/0d20666d71f1a8fabe01d01bcd2b3e649a3832c2)`
-  быть окончания строк    Git сохранял окончания  
-  CRLF, из-за чего Bash   строк shell-скриптов в  
-  выдавал ошибку          формате LF.             
-  `$'\\r'`.                                       
+| Пункт обратной связи | Что сделано | Ссылка на коммит или прогон |
+|---|---|---|
+| На Windows Quickstart падал на шаге 4: у `platform/up.sh` могли быть окончания строк CRLF, из-за чего Bash выдавал ошибку `$'\r'`. | Добавлено правило `*.sh text eol=lf` в `.gitattributes`, чтобы Git сохранял окончания строк shell-скриптов в формате LF. | [Коммит `0d20666`](https://github.com/OlegGayvoronsky/churn-service/commit/0d20666d71f1a8fabe01d01bcd2b3e649a3832c2) · [Прогон GitHub Actions](https://github.com/OlegGayvoronsky/churn-service/actions/runs/40510008103) |
+| В инструкции Quickstart отсутствовал шаг включения GitHub Actions в форке. | В Quickstart добавлен шаг: открыть вкладку **Actions** в своём форке и включить workflows. При необходимости нужно проверить разрешения в **Settings → Actions → General**. | [Коммит `e054183`](https://github.com/OlegGayvoronsky/churn-service/commit/e054183f8c4464dbd88539e26665a61f4091922c) |
+| В `REPORT.md` не было сводной таблицы заданий со ссылками на доказательства. | В начало отчёта добавлена таблица для заданий 1–6 со ссылками на имеющиеся скриншоты и прогоны GitHub Actions. | [Коммит `e054183`](https://github.com/OlegGayvoronsky/churn-service/commit/e054183f8c4464dbd88539e26665a61f4091922c) |
 
-  В инструкции Quickstart В Quickstart добавлен   
-  отсутствовал шаг        шаг: открыть вкладку    
-  включения GitHub        **Actions** в своём     `[0d20666](https://github.com/OlegGayvoronsky/churn-service/commit/0d20666d71f1a8fabe01d01bcd2b3e649a3832c2)`
-  Actions в форке.        форке и включить        
-                          workflows; если нужно,  
-                          проверить разрешения в  
-                          **Settings → Actions →  
-                          General**.              
-
-  В `REPORT.md` не было   В начало отчёта         
-  сводной таблицы заданий добавлена таблица для   
-  со ссылками на          заданий 1--6 со         
-  доказательства.         ссылками на имеющиеся   
-                          скриншоты и прогоны     
-                          GitHub Actions.         
-  ----------------------------------------------------------------------------------
