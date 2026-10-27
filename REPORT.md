@@ -2,29 +2,14 @@
 
 ## Таблица заданий и доказательств
 
-  -------------------------------------------------------------------------------------------------------------------------
-  Пункт задания                       Доказательства
-  ----------------------------------- -------------------------------------------------------------------------------------
-  Задание 1                           [Скриншот](assets/image.png)
-
-  Задание 2                           [Скриншот 1](assets/image-1.png), [скриншот 2](assets/image-2.png), [скриншот
-                                      3](assets/image-3.png), [скриншот 4](assets/image-4.png)
-
-  Задание 3                           [Скриншот 1](assets/image-5.png), [скриншот 2](assets/image-6.png)
-
-  Задание 4                           [Скриншот 1](assets/image-7.png), [скриншот 2](assets/image-8.png), [скриншот
-                                      3](assets/image-9.png), [зелёный прогон с
-                                      тестами](https://github.com/OlegGayvoronsky/churn-service/actions/runs/38867600215)
-
-  Задание 5                           [Скриншот DAG --- сценарий 1](assets/image-10.png), [сценарий
-                                      2](assets/image-11.png), [сценарий 3](assets/image-12.png), [после возврата валидных
-                                      данных](assets/image-13.png), [Model Registry](assets/image-14.png),
-                                      [дашборд](assets/image-15.png), [вывод генератора трафика во время
-                                      выката](assets/image-16.png)
-
-  Задание 6                           [Зелёный
-                                      прогон](https://github.com/OlegGayvoronsky/churn-service/actions/runs/39033106626)
-  -------------------------------------------------------------------------------------------------------------------------
+| Пункт задания | Доказательства |
+|---|---|
+| Задание 1 | [Скриншот](assets/image.png) |
+| Задание 2 | [Скриншот 1](assets/image-1.png), [скриншот 2](assets/image-2.png), [скриншот 3](assets/image-3.png), [скриншот 4](assets/image-4.png) |
+| Задание 3 | [Скриншот 1](assets/image-5.png), [скриншот 2](assets/image-6.png) |
+| Задание 4 | [Скриншот 1](assets/image-7.png), [скриншот 2](assets/image-8.png), [скриншот 3](assets/image-9.png), [Зелёный прогон с тестами](https://github.com/OlegGayvoronsky/churn-service/actions/runs/38867600215) |
+| Задание 5 | [Скриншот DAG — сценарий 1](assets/image-10.png), [сценарий 2](assets/image-11.png), [сценарий 3](assets/image-12.png), [после возврата валидных данных](assets/image-13.png), [Model Registry](assets/image-14.png), [дашборд](assets/image-15.png), [вывод генератора трафика во время выката](assets/image-16.png) |
+| Задание 6 | [Зелёный прогон](https://github.com/OlegGayvoronsky/churn-service/actions/runs/39033106626) |
 
 ## Схема системы
 
